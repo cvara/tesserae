@@ -9,7 +9,8 @@
   "author": "Christopher Varakliotis",
   "license": "MIT",
   "dependencies": {
-    "jquery": "2.2.4"
+    "jquery": "2.2.4",
+    "randomcolor": "^0.4.4"
   },
   "devDependencies": {
     "babel-core": "^6.14.0",

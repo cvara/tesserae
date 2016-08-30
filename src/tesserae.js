@@ -1,57 +1,121 @@
+import randomcolor from 'randomcolor';
 
 class Tesserae {
 
-	constructor (opts) {
-		this.options = opts;
-		this.draw(opts);
-		const lazyDraw = this._debounce(this.draw, 200).bind(this);
-		this.resizehandler = (event) => {
-			lazyDraw(opts);
-		};
-		window.addEventListener('resize', this.resizehandler);
+	constructor ({
+		// container selector
+		container,
+		// tessera width
+		tesseraWidth = 30,
+		// tessera height
+		tesseraHeight = 30,
+		// randomcolor lib options
+		randomcolor = {
+			hue: 'monochrome',
+			luminosity: 'light'
+		},
+		// filter: false or object
+		filter = {
+			color: 'red',
+			opacity: 0.2
+		}
+	}) {
+		// properties
+		this.containerEl = document.querySelector(container);
+		this.tesseraWidth = tesseraWidth;
+		this.tesseraHeight = tesseraHeight;
+		this.randomcolor = randomcolor;
+		this.filter = filter;
+		this.containerStyle = window.getComputedStyle(this.containerEl, null);
+		// init
+		this.init();
+	}
+
+	init () {
+		// lazy draw function (debounced)
+		this.lazyDraw = this._debounce(this.draw, 200).bind(this);
+		window.addEventListener('resize', this.lazyDraw);
+		// draw for the first time
+		this.draw();
 	}
 
 	destroy () {
-		const containerEl = document.querySelector(this.options.container);
-		this._emptyElement(containerEl);
-		window.removeEventListener('resize', this.resizehandler);
+		this._emptyContainer();
+		this.restoreContainer();
+		window.removeEventListener('resize', this.lazyDraw);
 	}
 
-	draw ({
-		container,
-		tesseraWidth = 30,
-		tesseraHeight = 30
-	}) {
-		const containerEl = document.querySelector(container);
-		const canvas = this._createCanvas(containerEl);
-		this._drawBackground(canvas, tesseraWidth, tesseraHeight);
+	draw () {
+		this._editContainer();
+		this.canvas = this._createCanvas();
+		this._drawBackground();
+		this._addFilter();
 	}
 
-	_createCanvas (containerEl) {
+	_editContainer () {
+		// if parent has a non-static position, make it relative
+		if (this.containerStyle.getPropertyValue('position') === 'static') {
+			this.containerEl.style.position = 'relative';
+		}
+		this.containerEl.style.boxSizing = 'border-box';
+	}
+
+	restoreContainer () {
+
+	}
+
+	_addFilter () {
+		if (!this.filter) {
+			return;
+		}
+
+		// prepare element
+		let filterEl = document.createElement('div');
+		filterEl.style.width = '100%';
+		filterEl.style.height = '100%';
+		filterEl.style.backgroundColor = this.filter.color;
+		filterEl.style.opacity = this.filter.opacity;
+		filterEl.style.position = 'absolute';
+		filterEl.style.zIndex = 1;
+		filterEl.style.top = 0;
+
+		this.containerEl.appendChild(filterEl);
+	}
+
+	_createCanvas () {
+		let cs = getComputedStyle(this.containerEl);
+
+		let elementHeight = this.containerEl.clientHeight;  // height with padding
+		let elementWidth = this.containerEl.clientWidth;   // width with padding
+
+		elementHeight -= parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+		elementWidth -= parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+
+		console.log(cs.getPropertyValue('width'));
 		const canvas = document.createElement('canvas');
 		canvas.id = 'tesserae';
-		canvas.width = containerEl.offsetWidth;
-		canvas.height = containerEl.offsetHeight;
-		this._emptyElement(containerEl);
-		containerEl.appendChild(canvas);
+		canvas.width = elementWidth;
+		canvas.height = elementHeight;
+		this._emptyContainer();
+		this.containerEl.appendChild(canvas);
 		return canvas;
 	}
 
-	_drawBackground (canvas, tesseraWidth, tesseraHeight) {
-		let xMod = canvas.offsetWidth % tesseraWidth;
-		let yMod = canvas.offsetHeight % tesseraHeight;
+	_drawBackground () {
+		let xMod = this.canvas.offsetWidth % this.tesseraWidth;
+		let yMod = this.canvas.offsetHeight % this.tesseraHeight;
 
-		let fullCols = Math.floor(canvas.offsetWidth / tesseraWidth);
+		let fullCols = Math.floor(this.canvas.offsetWidth / this.tesseraWidth);
 		let allCols = xMod > 0 ? fullCols + 2 : fullCols;
 
-		let fullRows = Math.floor(canvas.offsetHeight / tesseraHeight);
+		let fullRows = Math.floor(this.canvas.offsetHeight / this.tesseraHeight);
 		let allRows = yMod > 0 ? fullRows + 2 : fullRows;
 
 		let posY = 0;
 
 		for (let r = 0; r < allRows; r++) {
 			let posX = 0;
-			let actualHeight = tesseraHeight;
+			let actualHeight = this.tesseraHeight;
 			if (r === 0 && yMod > 0) {
 				actualHeight = Math.floor(yMod / 2);
 			}
@@ -60,14 +124,14 @@ class Tesserae {
 			}
 
 			for (let c = 0; c < allCols; c++) {
-				let actualWidth = tesseraWidth;
+				let actualWidth = this.tesseraWidth;
 				if (c === 0 && xMod > 0) {
 					actualWidth = Math.floor(xMod / 2);
 				}
 				if (c === allCols - 1 && xMod > 0) {
 					actualWidth = Math.ceil(xMod / 2);
 				}
-				this._drawTessera(canvas, posX, posY, actualWidth, actualHeight);
+				this._drawTessera(this.canvas, posX, posY, actualWidth, actualHeight);
 				posX = posX + actualWidth;
 			}
 			posY = posY + actualHeight;
@@ -81,10 +145,11 @@ class Tesserae {
 	}
 
 	getRandomColor () {
-		return '#'+Math.floor(Math.random()*16777215).toString(16);
+		return randomcolor(this.randomcolor);
 	}
 
-	_emptyElement (el) {
+	_emptyContainer () {
+		let el = this.containerEl;
 		while (el.firstChild) {
 		    el.removeChild(el.firstChild);
 		}
