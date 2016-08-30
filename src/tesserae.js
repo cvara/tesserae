@@ -41,13 +41,13 @@ class Tesserae {
 
 	destroy () {
 		this._emptyContainer();
-		this.restoreContainer();
+		this._restoreContainer();
 		window.removeEventListener('resize', this.lazyDraw);
 	}
 
 	draw () {
 		this._editContainer();
-		this.canvas = this._createCanvas();
+		this._createCanvas();
 		this._drawBackground();
 		this._addFilter();
 	}
@@ -60,8 +60,8 @@ class Tesserae {
 		this.containerEl.style.boxSizing = 'border-box';
 	}
 
-	restoreContainer () {
-
+	_restoreContainer () {
+		// TODO: restore original position & box-sizing of container
 	}
 
 	_addFilter () {
@@ -91,14 +91,12 @@ class Tesserae {
 		elementHeight -= parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
 		elementWidth -= parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
 
-		console.log(cs.getPropertyValue('width'));
-		const canvas = document.createElement('canvas');
-		canvas.id = 'tesserae';
-		canvas.width = elementWidth;
-		canvas.height = elementHeight;
+		this.canvas = document.createElement('canvas');
+		this.canvas.id = 'tesserae';
+		this.canvas.width = elementWidth;
+		this.canvas.height = elementHeight;
 		this._emptyContainer();
-		this.containerEl.appendChild(canvas);
-		return canvas;
+		this.containerEl.appendChild(this.canvas);
 	}
 
 	_drawBackground () {
