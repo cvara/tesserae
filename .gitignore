@@ -1,0 +1,13 @@
+# Include your project-specific ignores in this file
+# Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
+
+*.directory
+*~
+*.orig
+plato_reports
+node_modules
+*.7z
+*.TMP
+mocha
+.babel-cache
+*.map
