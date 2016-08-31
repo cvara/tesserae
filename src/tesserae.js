@@ -35,6 +35,11 @@ class Tesserae {
 		// all drawn tessera shapes are stored here
 		this.tesserae = [];
 
+		// render version
+		// NOTE: this is used to avoid issues with re-renders
+		// while current animation has not finished yet
+		this.renderVersion = 0;
+
 		// init
 		this.init();
 	}
@@ -54,24 +59,23 @@ class Tesserae {
 	}
 
 	draw () {
-		requestAnimationFrame(() => {
-			this._editContainer();
-			this._prepareCanvas();
-			this._generateTesserae();
-			this._addFilter();
+		this.renderVersion++;
 
-			// gradually show tesserae in random order
-			if (this.animate) {
-				const clone = this._cloneShallow(this.tesserae);
-				this._shuffle(clone);
-				this._drawTesseraeAnimated(clone, 0, this.animate.step || 1);
-			}
-			// show all resserae at once
-			else {
-				this._drawTesserae(this.tesserae);
-			}
-		});
+		this._editContainer();
+		this._prepareCanvas();
+		this._generateTesserae();
+		this._addFilter();
 
+		// gradually show tesserae in random order
+		if (this.animate) {
+			const clone = this._cloneShallow(this.tesserae);
+			this._shuffle(clone);
+			this._drawTesseraeAnimated(clone, 0, this.animate.step || 1, this.renderVersion);
+		}
+		// show all resserae at once
+		else {
+			this._drawTesserae(this.tesserae);
+		}
 	}
 
 	_editContainer () {
@@ -185,14 +189,16 @@ class Tesserae {
 		}
 	}
 
-	_drawTesseraeAnimated (tesserae, i, step) {
+	_drawTesseraeAnimated (tesserae, i, step, renderVersion) {
 		if (i in tesserae) {
 			let s = step;
 			while (s-- > 0) {
 				this._drawRect(tesserae[i++]);
 			}
 			requestAnimationFrame(() => {
-				this._drawTesseraeAnimated(tesserae, i, step);
+				if (renderVersion === this.renderVersion) {
+					this._drawTesseraeAnimated(tesserae, i, step, renderVersion);
+				}
 			});
 		}
 	}
@@ -207,7 +213,7 @@ class Tesserae {
 
 	// Fisher-Yates shuffle
 	_shuffle (array) {
-	    var m = array.length,
+	    let m = array.length,
 	        t, i;
 
 	    // While there remain elements to shuffle…
@@ -252,16 +258,16 @@ class Tesserae {
 	}
 
 	_debounce (func, wait, immediate) {
-		var timeout;
+		let timeout;
 		return function() {
-			var context = this, args = arguments;
-			var later = function() {
+			let context = this, args = arguments;
+			let later = function() {
 				timeout = null;
 				if (!immediate) {
 					func.apply(context, args);
 				}
 			};
-			var callNow = immediate && !timeout;
+			let callNow = immediate && !timeout;
 			clearTimeout(timeout);
 			timeout = setTimeout(later, wait);
 			if (callNow) {
