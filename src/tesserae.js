@@ -19,7 +19,7 @@ class Tesserae {
 			color: '#333',
 			opacity: 0.6
 		},
-		// whether to animate the mosaic no show
+		// whether to animate the mosaic on show
 		animate = false
 	}) {
 
@@ -64,7 +64,7 @@ class Tesserae {
 			if (this.animate) {
 				const clone = this._cloneShallow(this.tesserae);
 				this._shuffle(clone);
-				this._drawTesseraeAnimated(clone, 0);
+				this._drawTesseraeAnimated(clone, 0, this.animate.step || 1);
 			}
 			// show all resserae at once
 			else {
@@ -185,12 +185,14 @@ class Tesserae {
 		}
 	}
 
-	_drawTesseraeAnimated (tesserae, i) {
+	_drawTesseraeAnimated (tesserae, i, step) {
 		if (i in tesserae) {
-			this._drawRect(tesserae[i++]);
-			this._drawRect(tesserae[i++]);
+			let s = step;
+			while (s-- > 0) {
+				this._drawRect(tesserae[i++]);
+			}
 			requestAnimationFrame(() => {
-				this._drawTesseraeAnimated(tesserae, i);
+				this._drawTesseraeAnimated(tesserae, i, step);
 			});
 		}
 	}
