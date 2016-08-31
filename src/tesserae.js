@@ -16,17 +16,25 @@ class Tesserae {
 		},
 		// filter: false or object
 		filter = {
-			color: 'red',
-			opacity: 0.2
-		}
+			color: '#333',
+			opacity: 0.6
+		},
+		// whether to animate the mosaic or not
+		animate = true
 	}) {
+
 		// properties
 		this.containerEl = document.querySelector(container);
 		this.tesseraWidth = tesseraWidth;
 		this.tesseraHeight = tesseraHeight;
 		this.randomcolor = randomcolor;
 		this.filter = filter;
+		this.animate = animate;
 		this.containerStyle = window.getComputedStyle(this.containerEl, null);
+
+		// all drawn tessera shapes are stored here
+		this.tesserae = [];
+
 		// init
 		this.init();
 	}
@@ -48,8 +56,15 @@ class Tesserae {
 	draw () {
 		this._editContainer();
 		this._createCanvas();
-		this._drawBackground();
+		this._generateTesserae();
 		this._addFilter();
+		if (this.animate) {
+			const clone = this._cloneShallow(this.tesserae);
+			this._shuffle(clone);
+			this._drawTesseraeAnimated(clone, 0);
+		} else {
+			this._drawTesserae();
+		}
 	}
 
 	_editContainer () {
@@ -97,9 +112,10 @@ class Tesserae {
 		this.canvas.height = elementHeight;
 		this._emptyContainer();
 		this.containerEl.appendChild(this.canvas);
+		this.ctx = this.canvas.getContext('2d');
 	}
 
-	_drawBackground () {
+	_generateTesserae () {
 		let xMod = this.canvas.offsetWidth % this.tesseraWidth;
 		let yMod = this.canvas.offsetHeight % this.tesseraHeight;
 
@@ -129,17 +145,69 @@ class Tesserae {
 				if (c === allCols - 1 && xMod > 0) {
 					actualWidth = Math.ceil(xMod / 2);
 				}
-				this._drawTessera(this.canvas, posX, posY, actualWidth, actualHeight);
+				let tessera = {
+					x: posX,
+					y: posY,
+					width: actualWidth,
+					height: actualHeight,
+					color: this.getRandomColor(),
+					rendered: false
+				};
+				this.tesserae.push(tessera);
 				posX = posX + actualWidth;
 			}
 			posY = posY + actualHeight;
 		}
 	}
 
-	_drawTessera (canvas, x, y, width, height) {
-		const ctx = canvas.getContext('2d');
-		ctx.fillStyle = this.getRandomColor();
-		ctx.fillRect(x, y, width, height);
+	_drawTesserae () {
+		const tesserae = this.tesserae;
+		for (let i = 0, len = tesserae.length; i < len; i++) {
+			this._drawRect(tesserae[i]);
+		}
+	}
+
+	_drawTesseraeAnimated (tesserae, i) {
+		if (i in tesserae) {
+			this._drawRect(tesserae[i++]);
+			this._drawRect(tesserae[i++]);
+			requestAnimationFrame(() => {
+				this._drawTesseraeAnimated(tesserae, i);
+			});
+		}
+	}
+
+	_cloneShallow (array) {
+		let clone = [];
+		for (let i = 0, len = array.length; i < len; i++) {
+			clone[i] = array[i];
+		}
+		return clone;
+	}
+
+	// Fisher-Yates shuffle
+	_shuffle (array) {
+	    var m = array.length,
+	        t, i;
+
+	    // While there remain elements to shuffle…
+	    while (m) {
+
+	        // Pick a remaining element…
+	        i = Math.floor(Math.random() * m--);
+
+	        // And swap it with the current element.
+	        t = array[m];
+	        array[m] = array[i];
+	        array[i] = t;
+	    }
+
+	    return array;
+	}
+
+	_drawRect (rect) {
+		this.ctx.fillStyle = rect.color;
+		this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
 	}
 
 	getRandomColor () {
@@ -151,6 +219,16 @@ class Tesserae {
 		while (el.firstChild) {
 		    el.removeChild(el.firstChild);
 		}
+	}
+
+	_getRandomInt (min, max) {
+	  min = Math.ceil(min);
+	  max = Math.floor(max);
+	  return Math.floor(Math.random() * (max - min)) + min;
+	}
+
+	_getRandomTessera () {
+		return this.tesserae[this._getRandomInt(0, this.tesserae.length)];
 	}
 
 	_debounce (func, wait, immediate) {
