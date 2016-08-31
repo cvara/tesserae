@@ -22,7 +22,24 @@
 
 		<script type="text/javascript">
 			var tesserae = new Tesserae.default({
-				container: '#demo'
+				// container selector
+				container: '#demo',
+				// tessera width
+				tesseraWidth: 30,
+				// tessera height
+				tesseraHeight: 30,
+				// randomcolor lib options
+				randomcolor: {
+					hue: 'monochrome',
+					luminosity: 'light'
+				},
+				// filter: false or object
+				filter: {
+					color: '#333',
+					opacity: 0.6
+				},
+				// whether to animate the mosaic or not
+				animate: true
 			});
 		</script>
 	</body>
