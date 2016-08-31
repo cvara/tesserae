@@ -58,12 +58,16 @@ class Tesserae {
 		this._createCanvas();
 		this._generateTesserae();
 		this._addFilter();
+
+		// gradually show tesserae in random order
 		if (this.animate) {
 			const clone = this._cloneShallow(this.tesserae);
 			this._shuffle(clone);
 			this._drawTesseraeAnimated(clone, 0);
-		} else {
-			this._drawTesserae();
+		}
+		// show all resserae at once
+		else {
+			this._drawTesserae(this.tesserae);
 		}
 	}
 
@@ -160,8 +164,7 @@ class Tesserae {
 		}
 	}
 
-	_drawTesserae () {
-		const tesserae = this.tesserae;
+	_drawTesserae (tesserae) {
 		for (let i = 0, len = tesserae.length; i < len; i++) {
 			this._drawRect(tesserae[i]);
 		}
