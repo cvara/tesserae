@@ -1,6 +1,6 @@
 import randomcolor from 'randomcolor';
 
-const Utils = {};
+const Utils = window.Utils = {};
 
 
 // Returns debounced version of function
@@ -71,6 +71,68 @@ Utils.cloneArrayShallow = function(array) {
     return clone;
 };
 
+
+// Returns rgb representation of a hex color code
+Utils.hexToRgb = function(hex) {
+    let rgb = [];
+    let fail = false;
+    const original = hex;
+
+    hex = hex.replace(/#/, '');
+
+    if (hex.length === 3) {
+        hex = hex + hex;
+    }
+
+    for (let i = 0; i < 6; i += 2) {
+        rgb.push(parseInt(hex.substr(i, 2), 16));
+        fail = fail || rgb[rgb.length - 1].toString() === 'NaN';
+    }
+
+	return !fail && rgb;
+};
+
+
+// Returns hsl representation of an rgb color code
+Utils.rgbToHsl = function(r, g, b) {
+
+    r /= 255;
+	g /= 255;
+	b /= 255;
+
+    let max = Math.max(r, g, b),
+        min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0;
+    } else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+        switch (max) {
+            case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+            case g:
+                h = (b - r) / d + 2;
+                break;
+            case b:
+                h = (r - g) / d + 4;
+                break;
+        }
+
+        h /= 6;
+    }
+
+    return [(h * 100 + 0.5) | 0, ((s * 100 + 0.5) | 0) + '%', ((l * 100 + 0.5) | 0) + '%'];
+};
+
+
+// Returns hsl representation of a hex color code
+Utils.hexToHsl = function(hex) {
+	return Utils.rgbToHsl(...Utils.hexToRgb(hex));
+};
 
 
 export default Utils;
