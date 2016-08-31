@@ -19,8 +19,8 @@ class Tesserae {
 			color: '#333',
 			opacity: 0.6
 		},
-		// whether to animate the mosaic or not
-		animate = true
+		// whether to animate the mosaic no show
+		animate = false
 	}) {
 
 		// properties
@@ -54,21 +54,24 @@ class Tesserae {
 	}
 
 	draw () {
-		this._editContainer();
-		this._createCanvas();
-		this._generateTesserae();
-		this._addFilter();
+		requestAnimationFrame(() => {
+			this._editContainer();
+			this._prepareCanvas();
+			this._generateTesserae();
+			this._addFilter();
 
-		// gradually show tesserae in random order
-		if (this.animate) {
-			const clone = this._cloneShallow(this.tesserae);
-			this._shuffle(clone);
-			this._drawTesseraeAnimated(clone, 0);
-		}
-		// show all resserae at once
-		else {
-			this._drawTesserae(this.tesserae);
-		}
+			// gradually show tesserae in random order
+			if (this.animate) {
+				const clone = this._cloneShallow(this.tesserae);
+				this._shuffle(clone);
+				this._drawTesseraeAnimated(clone, 0);
+			}
+			// show all resserae at once
+			else {
+				this._drawTesserae(this.tesserae);
+			}
+		});
+
 	}
 
 	_editContainer () {
@@ -84,12 +87,12 @@ class Tesserae {
 	}
 
 	_addFilter () {
-		if (!this.filter) {
+		if (!this.filter || this.filterEl) {
 			return;
 		}
 
 		// prepare element
-		let filterEl = document.createElement('div');
+		let filterEl = this.filterEl = document.createElement('div');
 		filterEl.style.width = '100%';
 		filterEl.style.height = '100%';
 		filterEl.style.backgroundColor = this.filter.color;
@@ -101,8 +104,8 @@ class Tesserae {
 		this.containerEl.appendChild(filterEl);
 	}
 
-	_createCanvas () {
-		let cs = getComputedStyle(this.containerEl);
+	_prepareCanvas () {
+		let cs = this.containerStyle;
 
 		let elementHeight = this.containerEl.clientHeight;  // height with padding
 		let elementWidth = this.containerEl.clientWidth;   // width with padding
@@ -110,13 +113,23 @@ class Tesserae {
 		elementHeight -= parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
 		elementWidth -= parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
 
-		this.canvas = document.createElement('canvas');
-		this.canvas.id = 'tesserae';
+		// canvas exists
+		if (this.ctx && this.canvas) {
+			this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+		}
+		// canvas not created yet
+		else {
+			// create new canvas
+			this.canvas = document.createElement('canvas');
+			this.canvas.id = 'tesserae';
+			this._emptyContainer();
+			this.containerEl.appendChild(this.canvas);
+			this.ctx = this.canvas.getContext('2d');
+		}
+
+		// set canvas width in any case
 		this.canvas.width = elementWidth;
 		this.canvas.height = elementHeight;
-		this._emptyContainer();
-		this.containerEl.appendChild(this.canvas);
-		this.ctx = this.canvas.getContext('2d');
 	}
 
 	_generateTesserae () {
@@ -128,6 +141,9 @@ class Tesserae {
 
 		let fullRows = Math.floor(this.canvas.offsetHeight / this.tesseraHeight);
 		let allRows = yMod > 0 ? fullRows + 2 : fullRows;
+
+		// empty tesserae array
+		this.tesserae.length = 0;
 
 		let posY = 0;
 
@@ -154,8 +170,7 @@ class Tesserae {
 					y: posY,
 					width: actualWidth,
 					height: actualHeight,
-					color: this.getRandomColor(),
-					rendered: false
+					color: this.getRandomColor()
 				};
 				this.tesserae.push(tessera);
 				posX = posX + actualWidth;
