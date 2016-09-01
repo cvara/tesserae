@@ -27,8 +27,8 @@ class Tesserae {
 
 		// properties
 		this.containerEl = document.querySelector(container);
-		this.tesseraWidth = tesseraWidth;
-		this.tesseraHeight = tesseraHeight;
+		this.tesseraWidth = parseInt(tesseraWidth, 10);
+		this.tesseraHeight = parseInt(tesseraHeight, 10);
 		this.randomcolor = randomcolor;
 		this.filter = filter;
 		this.animate = animate;
