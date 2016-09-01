@@ -3,9 +3,6 @@
 // Load plugins
 var gulp = require('gulp');
 
-var sourcemaps = require('gulp-sourcemaps');
-// var babel = require('gulp-babel');
-var concat = require('gulp-concat');
 var webpack = require('gulp-webpack');
 var webpackConfig = require('./webpack.config');
 var connect = require('gulp-connect');
@@ -33,16 +30,11 @@ gulp.task('connect', function() {
 	});
 });
 
-// // Babel standalone
-// gulp.task('babel', function () {
-//   return gulp.src('src/**/*.js')
-//     .pipe(sourcemaps.init())
-//     .pipe(babel())
-//     .pipe(concat('tesserae.js'))
-//     .pipe(sourcemaps.write('.'))
-//     .pipe(gulp.dest('dist'))
-// 	.pipe(connect.reload());
-// });
+// Html (for livereload)
+gulp.task('html', function() {
+    gulp.src('./**/*.html')
+        .pipe(connect.reload());
+});
 
 // Webpack
 gulp.task('webpack', function() {
@@ -78,6 +70,8 @@ gulp.task('lint', function() {
 gulp.task('watch', function() {
 	// Watch .js files
 	gulp.watch(source + '/**/*.js', ['webpack']);
+	// Watch .html files
+	gulp.watch('./**/*.html', ['html']);
 });
 
 // Build (base build tasks, for dev)
