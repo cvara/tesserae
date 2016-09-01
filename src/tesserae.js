@@ -57,6 +57,7 @@ class Tesserae {
 	destroy () {
 		this._emptyContainer();
 		this._restoreContainer();
+		this.tesserae.length = 0;
 		window.removeEventListener('resize', this.lazyDraw);
 	}
 
