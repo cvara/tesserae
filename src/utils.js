@@ -134,5 +134,11 @@ Utils.hexToHsl = function(hex) {
 	return Utils.rgbToHsl(...Utils.hexToRgb(hex));
 };
 
+// Returns array representation of an hsl color string
+Utils.arrayToHsl = function(array) {
+	return `hsl(${array[0]},${array[1]}%,${array[2]}%)`;
+};
+
+
 
 export default Utils;
