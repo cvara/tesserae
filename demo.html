@@ -13,12 +13,19 @@
 		<style>
 			html, body {
 				font-family: 'Open Sans', sans-serif;
+				min-height: 100%;
+				background: #f2f2f2;
 			}
 			.hero {
 				width: 100%;
 				position: relative;
 				color: #fff;
-				padding: 30px 40px;
+				border-bottom: 3px solid #cecece;
+			}
+			.hero .contents {
+				position: relative;
+				padding: 40px 0;
+				z-index: 1;
 			}
 			.hero h1 {
 				font-size: 42px;
@@ -40,8 +47,28 @@
 				position: absolute;
 				top: 0;
 				left: 0;
-				z-index: -1;
+				z-index: 0;
 			}
+			.hero, .footer {
+				padding-left: 30px !important;
+				padding-right: 30px !important;
+			}
+			footer {
+				margin: 15px;
+				color: #656565;
+			}
+			footer img {
+				position: relative;
+				top: -2px
+			}
+			a,
+			a:visited {
+				color: #0071d2;
+			}
+			a:hover {
+				color: #0071d2;
+			}
+
 			@media (max-width: 480px) {
 				.hero h1 {
 					font-size: 32px;
@@ -55,65 +82,80 @@
 	<body>
 
 		<div class="hero">
-			<h1>Tesserae</h1>
-			<p>
-				Animated mosaic backgrounds with HTML5 Canvas
-			</p>
-			<form>
+			<div class="contents container">
 				<div class="row">
-					<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-						<div class="form-group">
-							<label for="hue">Hue</label>
-							<select class="form-control input-sm" id="hue" name="randomcolor[hue]">
-								<option>red</option>
-								<option>orange</option>
-								<option>yellow</option>
-								<option>green</option>
-								<option>blue</option>
-								<option>purple</option>
-								<option>pink</option>
-								<option selected="selected">monochrome</option>
-							</select>
-						</div>
+					<div class="col-xs-12 col-md-6">
+						<h1>Tesserae</h1>
+						<p>
+							Animated mosaic backgrounds with HTML5 Canvas
+						</p>
+					</div>
+					<div class="col-xs-12 col-md-6">
+						<form>
+							<div class="row">
+								<div class="col-xs-12 col-sm-6 col-md-6">
+									<div class="form-group">
+										<label for="hue">Hue</label>
+										<select class="form-control input-sm" id="hue" name="randomcolor[hue]">
+											<option>red</option>
+											<option>orange</option>
+											<option>yellow</option>
+											<option>green</option>
+											<option>blue</option>
+											<option>purple</option>
+											<option>pink</option>
+											<option selected="selected">monochrome</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 col-sm-6 col-md-6">
+									<div class="form-group">
+										<label for="luminosity">Luminosity</label>
+										<select class="form-control input-sm" id="luminosity" name="randomcolor[luminosity]">
+											<option>bright</option>
+											<option selected="selected">light</option>
+											<option>dark</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="form-group ">
+								<label for="width">Tessera size</label>
+								<div class="row">
+									<div class="col-xs-6 col-sm-2 col-md-2">
+										<input type="number" class="form-control input-sm" id="width" name="tesseraWidth" placeholder="width (px)" value="30">
+									</div>
+									<div class="col-xs-6 col-sm-2 col-md-2">
+										<input type="number" class="form-control input-sm col-sm-6" id="height" name="tesseraHeight" placeholder="height (px)" value="30">
+									</div>
+								</div>
+							</div>
+							<div class="form-group ">
+								<label for="width">Filter</label>
+								<div class="row">
+									<div class="col-xs-6 col-sm-2 col-md-2">
+										<input type="color" class="form-control input-sm" id="width" name="filter[color]" placeholder="filter color" value="#16a085">
+									</div>
+									<div class="col-xs-6 col-sm-2 col-md-2">
+										<input type="number" min="0" max="1" step="0.05" class="form-control input-sm col-sm-6" id="height" name="filter[opacity]" placeholder="filter opacity" value="0.9">
+									</div>
+								</div>
+							</div>
+						</form>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-						<div class="form-group">
-							<label for="luminosity">Luminosity</label>
-							<select class="form-control input-sm" id="luminosity" name="randomcolor[luminosity]">
-								<option>bright</option>
-								<option selected="selected">light</option>
-								<option>dark</option>
-							</select>
-						</div>
-					</div>
-				</div>
-				<div class="form-group ">
-					<label for="width">Tessera size</label>
-					<div class="row">
-						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
-							<input type="number" class="form-control input-sm" id="width" name="tesseraWidth" placeholder="width (px)" value="30">
-						</div>
-						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
-							<input type="number" class="form-control input-sm col-sm-6" id="height" name="tesseraHeight" placeholder="height (px)" value="30">
-						</div>
-					</div>
-				</div>
-				<div class="form-group ">
-					<label for="width">Filter</label>
-					<div class="row">
-						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
-							<input type="color" class="form-control input-sm" id="width" name="filter[color]" placeholder="filter color" value="#16a085">
-						</div>
-						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
-							<input type="number" min="0" max="1" step="0.1" class="form-control input-sm col-sm-6" id="height" name="filter[opacity]" placeholder="filter opacity" value="0.8">
-						</div>
-					</div>
-				</div>
-			</form>
+
+
+			</div>
 			<div id="tesserae-bg"></div>
 		</div>
+
+		<footer class="container">
+			Authored by <a href="https://github.com/TheT0dd">Christopher Varakliotis</a>
+			<span class="pull-right">view on <a href="https://github.com/TheT0dd/tesserae">GitHub</a> <img height="22" width="auto" src="/img/GitHub-Mark/PNG/GitHub-Mark-32px.png" alt="GitHub" /></span>
+		</footer>
 
 
 		<!-- tessera -->
