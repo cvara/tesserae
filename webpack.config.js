@@ -22,6 +22,10 @@ module.exports = {
 	        loader: 'babel', // 'babel-loader' is also a legal name to reference
 	        query: {
 	            presets: ['es2015'],
+				plugins: [
+					// see: https://www.npmjs.com/package/babel-plugin-add-module-exports
+				    'add-module-exports'
+				],
 	            cacheDirectory: __dirname + '/.babel-cache'
 	        }
 	    }]

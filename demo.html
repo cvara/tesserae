@@ -196,12 +196,12 @@
 				return $.extend({}, options, newOpts);
 			}
 
-			var tesserae = new Tesserae.default(getUpdatedOptions());
+			var tesserae = new Tesserae(getUpdatedOptions());
 
 			$('form :input').change(function() {
 				options = getUpdatedOptions();
 				tesserae.destroy();
-				tesserae = new Tesserae.default(options);
+				tesserae = new Tesserae(options);
 			});
 
 		</script>
