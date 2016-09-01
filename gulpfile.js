@@ -12,7 +12,6 @@ var uglify = require('gulp-uglify');
 var livereload = require('gulp-livereload');
 var del = require('del');
 var runSequence = require('run-sequence');
-var argv = require('yargs').argv;
 
 var source = __dirname + '/src';
 var dist = __dirname + '/dist';
@@ -22,7 +21,7 @@ var dist = __dirname + '/dist';
 gulp.task('connect', function() {
 	connect.server({
 		root: './',
-		port: argv.port || 5000,
+		port: 5000,
 		hostname: '*', // to allow access to server from outside
 		livereload: {
 			port: 35731
