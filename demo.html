@@ -3,47 +3,165 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Tesserae Demo</title>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans:300,400" rel="stylesheet">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
 		<style>
-			#demo {
-				height: 320px;
+			html, body {
+				font-family: 'Open Sans', sans-serif;
+			}
+			.hero {
 				width: 100%;
-				/*border: 10px solid #333;*/
-				box-sizing: border-box;
+				position: relative;
+				color: #fff;
+				padding: 30px 40px;
+			}
+			.hero h1 {
+				font-size: 42px;
+				font-weight: 700;
+				margin: 0 0 5px;
+				font-family: 'Open Sans Condensed', sans-serif;
+			}
+			.hero p {
+				margin: 5px 0 30px;
+				font-size: 28px;
+				font-family: 'Open Sans Condensed', sans-serif;
+			}
+			form {
+				float: none !important;
+			}
+			#tesserae-bg {
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: -1;
+			}
+			@media (max-width: 480px) {
+				.hero h1 {
+					font-size: 32px;
+				}
+				.hero p {
+					font-size: 24px;
+				}
 			}
 		</style>
 	</head>
 	<body>
 
-		<div id="demo">
-
+		<div class="hero">
+			<h1>Tesserae</h1>
+			<p>
+				Animated mosaic backgrounds with HTML5 Canvas
+			</p>
+			<form>
+				<div class="row">
+					<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+						<div class="form-group">
+							<label for="hue">Hue</label>
+							<select class="form-control input-sm" id="hue" name="randomcolor[hue]">
+								<option>red</option>
+								<option>orange</option>
+								<option>yellow</option>
+								<option>green</option>
+								<option>blue</option>
+								<option>purple</option>
+								<option>pink</option>
+								<option selected="selected">monochrome</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+						<div class="form-group">
+							<label for="luminosity">Luminosity</label>
+							<select class="form-control input-sm" id="luminosity" name="randomcolor[luminosity]">
+								<option>bright</option>
+								<option selected="selected">light</option>
+								<option>dark</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="form-group ">
+					<label for="width">Tessera size</label>
+					<div class="row">
+						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+							<input type="number" class="form-control input-sm" id="width" name="tesseraWidth" placeholder="width (px)" value="30">
+						</div>
+						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+							<input type="number" class="form-control input-sm col-sm-6" id="height" name="tesseraHeight" placeholder="height (px)" value="30">
+						</div>
+					</div>
+				</div>
+				<div class="form-group ">
+					<label for="width">Filter</label>
+					<div class="row">
+						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+							<input type="color" class="form-control input-sm" id="width" name="filter[color]" placeholder="filter color" value="#16a085">
+						</div>
+						<div class="col-xs-6 col-sm-4 col-md-2 col-lg-2">
+							<input type="number" min="0" max="1" step="0.1" class="form-control input-sm col-sm-6" id="height" name="filter[opacity]" placeholder="filter opacity" value="0.8">
+						</div>
+					</div>
+				</div>
+			</form>
+			<div id="tesserae-bg"></div>
 		</div>
 
+
+		<!-- tessera -->
 		<script type="text/javascript" src="dist/tesserae.js"></script>
 
+		<!-- demo code -->
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.5.0/jquery.serialize-object.min.js"></script>
+
 		<script type="text/javascript">
-			var tesserae = new Tesserae.default({
+
+			var options = {
 				// container selector
-				container: '#demo',
-				// tessera width
-				tesseraWidth: 30,
-				// tessera height
-				tesseraHeight: 30,
-				// randomcolor lib options
-				randomcolor: {
-					hue: 'monochrome',
-					luminosity: 'light'
-				},
-				// filter: false or object
-				filter: {
-					color: '#000',
-					opacity: 0.6
-				},
+				container: '#tesserae-bg',
 				// animate: false or object
 				animate: {
 					enable: true,
 					step: 3
-				}
+				},
+				// // tessera width
+				// tesseraWidth: 30,
+				// // tessera height
+				// tesseraHeight: 30,
+				// // randomcolor lib options
+				// randomcolor: {
+				// 	hue: 'monochrome',
+				// 	luminosity: 'light'
+				// },
+				// // filter: false or object
+				// filter: {
+				// 	color: '#000',
+				// 	opacity: 0.6
+				// }
+			};
+
+			function getUpdatedOptions() {
+				var newOpts = $('form').serializeObject();
+				return $.extend({}, options, newOpts);
+			}
+
+			var tesserae = new Tesserae.default(getUpdatedOptions());
+
+			$('form :input').change(function() {
+				options = getUpdatedOptions();
+				tesserae.destroy();
+				tesserae = new Tesserae.default(options);
 			});
+
 		</script>
 	</body>
 </html>
