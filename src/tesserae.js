@@ -1,3 +1,4 @@
+import Tessera from 'tessera';
 import Utils from 'utils';
 
 
@@ -68,7 +69,7 @@ class Tesserae {
 		this._addFilter();
 
 		// gradually show tesserae in random order
-		if (this.animate) {
+		if (this.animate && this.animate.enable) {
 			const clone = Utils.cloneArrayShallow(this.tesserae);
 			Utils.shuffle(clone);
 			this._drawTesseraeAnimated(clone, 0, this.animate.step || 1, this.renderVersion);
@@ -170,13 +171,13 @@ class Tesserae {
 				if (c === allCols - 1 && xMod > 0) {
 					actualWidth = Math.ceil(xMod / 2);
 				}
-				let tessera = {
+				let tessera = new Tessera({
 					x: posX,
 					y: posY,
 					width: actualWidth,
 					height: actualHeight,
-					color: Utils.getRandomColor(this.randomcolor)
-				};
+					hslArray: Utils.getRandomColor(this.randomcolor, 'hslArray')
+				});
 				this.tesserae.push(tessera);
 				posX = posX + actualWidth;
 			}
@@ -186,15 +187,15 @@ class Tesserae {
 
 	_drawTesserae (tesserae) {
 		for (let i = 0, len = tesserae.length; i < len; i++) {
-			this._drawRect(tesserae[i]);
+			tesserae[i].draw(this.ctx);
 		}
 	}
 
 	_drawTesseraeAnimated (tesserae, i, step, renderVersion) {
 		if (i in tesserae) {
 			let s = step;
-			while (s-- > 0) {
-				this._drawRect(tesserae[i++]);
+			while (s-- > 0 && tesserae[i]) {
+				tesserae[i++].drawAnimated(this.ctx);
 			}
 			requestAnimationFrame(() => {
 				if (renderVersion === this.renderVersion) {
@@ -202,11 +203,6 @@ class Tesserae {
 				}
 			});
 		}
-	}
-
-	_drawRect (rect) {
-		this.ctx.fillStyle = rect.color;
-		this.ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
 	}
 
 	_emptyContainer () {

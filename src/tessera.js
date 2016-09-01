@@ -1,0 +1,48 @@
+import Utils from 'utils';
+
+
+class Tessera {
+
+	constructor ({x, y, width, height, hsl, hslArray}) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		this.hsl = Utils.arrayToHsl(hslArray);
+		this.hslArray = hslArray;
+
+		// for animation
+		this.animateStep = 2;
+	}
+
+	draw (ctx) {
+		ctx.fillStyle = this.hsl;
+		ctx.fillRect(this.x, this.y, this.width, this.height);
+	}
+
+	drawAnimated (ctx) {
+		// initial animation step
+		if (!this._hslStepArray) {
+			this._hslStepArray = [this.hslArray[0], this.hslArray[1], 100];
+		}
+
+		// convert current step color to hsl string
+		ctx.fillStyle = Utils.arrayToHsl(this._hslStepArray);
+		// draw rectangle
+		ctx.fillRect(this.x, this.y, this.width, this.height);
+
+		// stop condition
+		if (this._hslStepArray[2] === this.hslArray[2]) {
+			delete this._hslStepArray;
+			return;
+		}
+
+		// calculate color for next step
+		this._hslStepArray[2] = Math.max(this._hslStepArray[2] - this.animateStep, this.hslArray[2]);
+		requestAnimationFrame(() => {
+			this.drawAnimated(ctx);
+		});
+	}
+}
+
+export default Tessera;
