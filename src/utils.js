@@ -36,8 +36,13 @@ Utils.getRandomInt = function(min, max) {
 
 // Returns random color using a random color generator
 // see: https://github.com/davidmerfield/randomColor
-Utils.getRandomColor = function(opts) {
-	return randomcolor(opts);
+Utils.getRandomColor = function(opts, format) {
+	opts.format = format;
+	let color = [];
+	do {
+		color = randomcolor(opts);
+	} while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
+	return color;
 };
 
 
