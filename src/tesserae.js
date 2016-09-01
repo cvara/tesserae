@@ -21,7 +21,9 @@ class Tesserae {
 			color: '#333',
 			opacity: 0.6
 		},
-		// whether to animate the mosaic on show
+		// gradual: false or object
+		gradual = false,
+		// animate: false or object
 		animate = false
 	}) {
 
@@ -31,6 +33,7 @@ class Tesserae {
 		this.tesseraHeight = parseInt(tesseraHeight, 10);
 		this.randomcolor = randomcolor;
 		this.filter = filter;
+		this.gradual = gradual;
 		this.animate = animate;
 		this.containerStyle = window.getComputedStyle(this.containerEl, null);
 
@@ -70,10 +73,10 @@ class Tesserae {
 		this._addFilter();
 
 		// gradually show tesserae in random order
-		if (this.animate && this.animate.enable) {
+		if (this.gradual && this.gradual.enable) {
 			const clone = Utils.cloneArrayShallow(this.tesserae);
 			Utils.shuffle(clone);
-			this._drawTesseraeAnimated(clone, 0, this.animate.step || 1, this.renderVersion);
+			this._drawTesseraeGradually(clone, 0, this.gradual.step || 1, this.renderVersion);
 		}
 		// show all tesserae at once
 		else {
@@ -188,19 +191,19 @@ class Tesserae {
 
 	_drawTesserae (tesserae) {
 		for (let i = 0, len = tesserae.length; i < len; i++) {
-			tesserae[i].draw(this.ctx);
+			tesserae[i].draw(this.ctx, this.animate);
 		}
 	}
 
-	_drawTesseraeAnimated (tesserae, i, step, renderVersion) {
+	_drawTesseraeGradually (tesserae, i, step, renderVersion) {
 		if (i in tesserae) {
 			let s = step;
 			while (s-- > 0 && tesserae[i]) {
-				tesserae[i++].drawAnimated(this.ctx);
+				tesserae[i++].draw(this.ctx, this.animate);
 			}
 			requestAnimationFrame(() => {
 				if (renderVersion === this.renderVersion) {
-					this._drawTesseraeAnimated(tesserae, i, step, renderVersion);
+					this._drawTesseraeGradually(tesserae, i, step, renderVersion);
 				}
 			});
 		}

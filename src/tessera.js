@@ -10,17 +10,18 @@ class Tessera {
 		this.height = height;
 		this.hsl = Utils.arrayToHsl(hslArray);
 		this.hslArray = hslArray;
-
-		// for animation
-		this.animateStep = 2;
 	}
 
-	draw (ctx) {
-		ctx.fillStyle = this.hsl;
-		ctx.fillRect(this.x, this.y, this.width, this.height);
+	draw (ctx, animate) {
+		if (animate && animate.enable) {
+			this.drawAnimated(ctx, animate.step);
+		} else {
+			ctx.fillStyle = this.hsl;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+		}
 	}
 
-	drawAnimated (ctx) {
+	drawAnimated (ctx, animateStep = 2) {
 		// initial animation step
 		if (!this._hslStepArray) {
 			this._hslStepArray = [this.hslArray[0], this.hslArray[1], 100];
@@ -38,7 +39,7 @@ class Tessera {
 		}
 
 		// calculate color for next step
-		this._hslStepArray[2] = Math.max(this._hslStepArray[2] - this.animateStep, this.hslArray[2]);
+		this._hslStepArray[2] = Math.max(this._hslStepArray[2] - animateStep, this.hslArray[2]);
 		requestAnimationFrame(() => {
 			this.drawAnimated(ctx);
 		});
