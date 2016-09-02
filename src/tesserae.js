@@ -27,8 +27,19 @@ class Tesserae {
 		animate = false
 	}) {
 
+		// container is the only required parameter
+		if (!container) {
+			throw 'Tesserae Error: container option is missing.';
+		}
+
 		// properties
 		this.containerEl = document.querySelector(container);
+
+		// make sure container selector gives an existing dom element
+		if (!this.containerEl) {
+			throw `Tesserae Error: no container element found: ${container}`;
+		}
+
 		this.tesseraWidth = parseInt(tesseraWidth, 10);
 		this.tesseraHeight = parseInt(tesseraHeight, 10);
 		this.randomcolor = randomcolor;
