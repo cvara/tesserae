@@ -1,5 +1,5 @@
-const Tessera = require('tessera');
-const Utils = require('utils');
+const Tessera = require('./tessera');
+const Utils = require('./utils');
 
 class Tesserae {
 
