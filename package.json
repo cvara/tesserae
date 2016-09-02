@@ -1,6 +1,6 @@
 {
   "name": "tesserae",
-  "version": "0.0.1",
+  "version": "0.9.0",
   "description": "Animated mosaic backgrounds for the web",
   "keywords": [
     "mosaic",
@@ -8,6 +8,10 @@
     "canvas"
   ],
   "main": "src/tesserae.js",
+  "repository": {
+	"type": "git",
+	"url": "https://github.com/TheT0dd/tesserae.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
