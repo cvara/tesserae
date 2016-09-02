@@ -1,6 +1,5 @@
-import Tessera from 'tessera';
-import Utils from 'utils';
-
+const Tessera = require('tessera');
+const Utils = require('utils');
 
 class Tesserae {
 
@@ -238,4 +237,4 @@ class Tesserae {
 	}
 }
 
-export default Tesserae;
+module.exports = Tesserae;

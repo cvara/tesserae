@@ -47,23 +47,12 @@ var Tesserae =
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _tessera = __webpack_require__(1);
-
-	var _tessera2 = _interopRequireDefault(_tessera);
-
-	var _utils = __webpack_require__(2);
-
-	var _utils2 = _interopRequireDefault(_utils);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Tessera = __webpack_require__(1);
+	var Utils = __webpack_require__(2);
 
 	var Tesserae = function () {
 		function Tesserae(_ref) {
@@ -132,7 +121,7 @@ var Tesserae =
 			key: 'init',
 			value: function init() {
 				// lazy draw function (debounced)
-				this.lazyDraw = _utils2.default.debounce(this.draw, 200).bind(this);
+				this.lazyDraw = Utils.debounce(this.draw, 200).bind(this);
 				window.addEventListener('resize', this.lazyDraw);
 				// draw for the first time
 				this.draw();
@@ -157,8 +146,8 @@ var Tesserae =
 
 				// gradually show tesserae in random order
 				if (this.gradual && this.gradual.enable) {
-					var clone = _utils2.default.cloneArrayShallow(this.tesserae);
-					_utils2.default.shuffle(clone);
+					var clone = Utils.cloneArrayShallow(this.tesserae);
+					Utils.shuffle(clone);
 					this._drawTesseraeGradually(clone, 0, this.gradual.step || 1, this.renderVersion);
 				}
 				// show all tesserae at once
@@ -263,12 +252,12 @@ var Tesserae =
 						if (c === allCols - 1 && xMod > 0) {
 							actualWidth = Math.ceil(xMod / 2);
 						}
-						var tessera = new _tessera2.default({
+						var tessera = new Tessera({
 							x: posX,
 							y: posY,
 							width: actualWidth,
 							height: actualHeight,
-							hslArray: _utils2.default.getRandomColor(this.randomcolor, 'hslArray')
+							hslArray: Utils.getRandomColor(this.randomcolor, 'hslArray')
 						});
 						this.tesserae.push(tessera);
 						posX = posX + actualWidth;
@@ -311,15 +300,14 @@ var Tesserae =
 		}, {
 			key: '_getRandomTessera',
 			value: function _getRandomTessera() {
-				return this.tesserae[_utils2.default.getRandomInt(0, this.tesserae.length)];
+				return this.tesserae[Utils.getRandomInt(0, this.tesserae.length)];
 			}
 		}]);
 
 		return Tesserae;
 	}();
 
-	exports.default = Tesserae;
-	module.exports = exports['default'];
+		module.exports = Tesserae;
 
 /***/ },
 /* 1 */
@@ -327,19 +315,11 @@ var Tesserae =
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _utils = __webpack_require__(2);
-
-	var _utils2 = _interopRequireDefault(_utils);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Utils = __webpack_require__(2);
 
 	var Tessera = function () {
 		function Tessera(_ref) {
@@ -356,7 +336,7 @@ var Tesserae =
 			this.y = y;
 			this.width = width;
 			this.height = height;
-			this.hsl = _utils2.default.arrayToHsl(hslArray);
+			this.hsl = Utils.arrayToHsl(hslArray);
 			this.hslArray = hslArray;
 		}
 
@@ -383,7 +363,7 @@ var Tesserae =
 				}
 
 				// convert current step color to hsl string
-				ctx.fillStyle = _utils2.default.arrayToHsl(this._hslStepArray);
+				ctx.fillStyle = Utils.arrayToHsl(this._hslStepArray);
 				// draw rectangle
 				ctx.fillRect(this.x, this.y, this.width, this.height);
 
@@ -404,8 +384,7 @@ var Tesserae =
 		return Tessera;
 	}();
 
-	exports.default = Tessera;
-	module.exports = exports['default'];
+		module.exports = Tessera;
 
 /***/ },
 /* 2 */
@@ -413,19 +392,11 @@ var Tesserae =
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _randomcolor = __webpack_require__(3);
-
-	var _randomcolor2 = _interopRequireDefault(_randomcolor);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-	var Utils = window.Utils = {};
+	var randomcolor = __webpack_require__(3);
+
+	var Utils = {};
 
 	// Returns debounced version of function
 	// Code borrowed from underscore:
@@ -463,7 +434,7 @@ var Tesserae =
 	    opts.format = format;
 	    var color = [];
 	    do {
-	        color = (0, _randomcolor2.default)(opts);
+	        color = randomcolor(opts);
 	    } while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
 	    return color;
 	};
@@ -565,8 +536,7 @@ var Tesserae =
 	    return 'hsl(' + array[0] + ',' + array[1] + '%,' + array[2] + '%)';
 	};
 
-	exports.default = Utils;
-	module.exports = exports['default'];
+		module.exports = Utils;
 
 /***/ },
 /* 3 */

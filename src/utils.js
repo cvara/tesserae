@@ -1,6 +1,6 @@
-import randomcolor from 'randomcolor';
+const randomcolor = require('randomcolor');
 
-const Utils = window.Utils = {};
+const Utils = {};
 
 
 // Returns debounced version of function
@@ -145,5 +145,4 @@ Utils.arrayToHsl = function(array) {
 };
 
 
-
-export default Utils;
+module.exports = Utils;

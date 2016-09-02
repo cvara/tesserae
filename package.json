@@ -7,12 +7,14 @@
     "background",
     "canvas"
   ],
-  "main": "src/tesserae.js",
+  "main": "dist/tesserae.js",
   "repository": {
-	"type": "git",
-	"url": "https://github.com/TheT0dd/tesserae.git"
+    "type": "git",
+    "url": "https://github.com/TheT0dd/tesserae.git"
   },
   "scripts": {
+	"build": "babel src --presets babel-preset-es2015 --out-dir dist",
+	"prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Christopher Varakliotis",
@@ -21,6 +23,7 @@
     "randomcolor": "^0.4.4"
   },
   "devDependencies": {
+    "babel-cli": "^6.14.0",
     "babel-core": "^6.14.0",
     "babel-loader": "^6.2.5",
     "babel-plugin-add-module-exports": "^0.2.1",

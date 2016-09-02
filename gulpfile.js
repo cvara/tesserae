@@ -15,7 +15,7 @@ var runSequence = require('run-sequence');
 var rename = require('gulp-rename');
 
 var source = __dirname + '/src';
-var dist = __dirname + '/dist';
+var bundle = __dirname + '/bundle';
 
 
 // Local connect server for testing
@@ -40,23 +40,23 @@ gulp.task('html', function() {
 gulp.task('webpack', function() {
 	return gulp.src(source + '/tesserae.js')
 		.pipe(webpack(webpackConfig))
-		.pipe(gulp.dest(dist))
+		.pipe(gulp.dest(bundle))
 		.pipe(connect.reload());
 });
 
 // Uglify output
 gulp.task('uglify', function() {
-	return gulp.src(dist + '/tesserae.js')
+	return gulp.src(bundle + '/tesserae.js')
 		.pipe(uglify())
 		.pipe(rename({
 			suffix: '.min'
 		}))
-		.pipe(gulp.dest(dist));
+		.pipe(gulp.dest(bundle));
 });
 
 // Clean
 gulp.task('clean', function(cb) {
-	del([dist], cb);
+	del([bundle], cb);
 });
 
 // Lint
@@ -82,8 +82,8 @@ gulp.task('build', function(callback) {
 	runSequence('clean', 'webpack', callback);
 });
 
-// Build dist
-gulp.task('dist', function(callback) {
+// Build bundle
+gulp.task('bundle', function(callback) {
 	runSequence('clean', 'webpack', 'uglify', callback);
 });
 

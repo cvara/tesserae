@@ -11,3 +11,4 @@ node_modules
 mocha
 .babel-cache
 *.map
+dist
