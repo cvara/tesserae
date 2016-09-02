@@ -1,9 +1,7 @@
 Tesserae
 =======================
 
-> Animated mosaic backgrounds with HTML5 Canvas
->
-> View [demo](https://thet0dd.github.io/tesserae/)
+> Animated mosaic backgrounds with HTML5 Canvas ([**demo**](https://thet0dd.github.io/tesserae/))
 
 Tesserae is a small library that creates customizable and optionally animated mosaic patterns that can be used to replace dull/static/image backgrounds.
 
