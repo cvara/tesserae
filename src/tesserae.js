@@ -18,7 +18,7 @@ class Tesserae {
 		},
 		// filter: false or object
 		filter = {
-			color: '#333',
+			color: '#000',
 			opacity: 0.6
 		},
 		// gradual: false or object
