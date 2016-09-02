@@ -21,7 +21,7 @@ Installation
 
 **Option 1: Browser**
 
-Include the `/dist/tesserae.js` or `/dist/tesserae.min.js` preferably at the end of your `<body>`, i.e:
+Include the `/bundle/tesserae.js` or `/bundle/tesserae.min.js` preferably at the end of your `<body>`, i.e:
 
 
 ```html
@@ -197,4 +197,38 @@ var t = new Tesserae({
     step: 4
   }
 });
+```
+
+Methods
+------------
+
+By keeping a reference to the create Tesserae instance you may invoke the following methods:
+
+
+### destroy()
+
+Destroys the canvas and unresgisters all listeners.
+
+```js
+// create a Tesserae instance
+var t = new Tesserae({
+  container: '#some-container'
+});
+// destroy it
+t.destroy();
+```
+
+### draw()
+
+Draws the mosaic. It is automatically called upon the creation of a new instance. Manually calling it again will re-draw the mosaic. It is a good idea to manually call `draw` anytime the container size changes.
+
+**NOTE: Tesserae listens for window resize events and re-draws automatically, so you need only worry about programatical size changes of the container (i.e. when you manually update its size)**
+
+```js
+// create a Tesserae instance
+var t = new Tesserae({
+  container: '#some-container'
+});
+// destroy it
+t.destroy();
 ```
