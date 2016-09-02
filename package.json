@@ -1,6 +1,6 @@
 {
   "name": "tesserae",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Animated mosaic backgrounds for the web",
   "keywords": [
     "mosaic",
@@ -13,8 +13,8 @@
     "url": "https://github.com/TheT0dd/tesserae.git"
   },
   "scripts": {
-	"build": "babel src --presets babel-preset-es2015 --out-dir dist",
-	"prepublish": "npm run build",
+    "build": "babel src --presets babel-preset-es2015 --out-dir dist",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Christopher Varakliotis",
