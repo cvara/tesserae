@@ -202,12 +202,12 @@ var t = new Tesserae({
 Methods
 ------------
 
-By keeping a reference to the create Tesserae instance you may invoke the following methods:
+By keeping a reference to the created Tesserae instance you may invoke the following methods:
 
 
 ### destroy()
 
-Destroys the canvas and unresgisters all listeners.
+Destroys the canvas and unregisters all listeners.
 
 ```js
 // create a Tesserae instance
@@ -229,6 +229,6 @@ Draws the mosaic. It is automatically called upon the creation of a new instance
 var t = new Tesserae({
   container: '#some-container'
 });
-// destroy it
-t.destroy();
+// re-draw
+t.draw();
 ```
