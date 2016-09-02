@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Tesserae Demo</title>
+
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,700|Open+Sans:300,400" rel="stylesheet">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<style>
+			html, body {
+				font-family: 'Open Sans', sans-serif;
+				min-height: 100%;
+				background: #f2f2f2;
+			}
+			.hero {
+				width: 100%;
+				position: relative;
+				color: #fff;
+				border-bottom: 3px solid #cecece;
+			}
+			.hero .contents {
+				position: relative;
+				padding: 40px 0;
+				z-index: 1;
+			}
+			.hero h1 {
+				font-size: 42px;
+				font-weight: 700;
+				margin: 0 0 5px;
+				font-family: 'Open Sans Condensed', sans-serif;
+			}
+			.hero p {
+				margin: 5px 0 30px;
+				font-size: 28px;
+				font-family: 'Open Sans Condensed', sans-serif;
+			}
+			form {
+				float: none !important;
+			}
+			#tesserae-bg {
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				z-index: 0;
+			}
+			.hero, .footer {
+				padding-left: 30px !important;
+				padding-right: 30px !important;
+			}
+			footer {
+				margin: 15px;
+				color: #656565;
+			}
+			footer img {
+				position: relative;
+				top: -2px
+			}
+			a,
+			a:visited {
+				color: #0071d2;
+			}
+			a:hover {
+				color: #0071d2;
+			}
+
+			@media (max-width: 480px) {
+				.hero h1 {
+					font-size: 32px;
+				}
+				.hero p {
+					font-size: 24px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="hero">
+			<div class="contents container">
+				<div class="row">
+					<div class="col-xs-12 col-md-6">
+						<h1>Tesserae</h1>
+						<p>
+							Animated mosaic backgrounds with HTML5 Canvas
+						</p>
+					</div>
+					<div class="col-xs-12 col-md-6">
+						<form>
+							<div class="row">
+								<div class="col-xs-12 col-sm-6 col-md-6">
+									<div class="form-group">
+										<label for="hue">Hue</label>
+										<select class="form-control input-sm" id="hue" name="randomcolor[hue]">
+											<option>red</option>
+											<option>orange</option>
+											<option>yellow</option>
+											<option>green</option>
+											<option>blue</option>
+											<option>purple</option>
+											<option>pink</option>
+											<option selected="selected">monochrome</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-xs-12 col-sm-6 col-md-6">
+									<div class="form-group">
+										<label for="luminosity">Luminosity</label>
+										<select class="form-control input-sm" id="luminosity" name="randomcolor[luminosity]">
+											<option>bright</option>
+											<option selected="selected">light</option>
+											<option>dark</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							<div class="form-group ">
+								<label for="width">Tessera size</label>
+								<div class="row">
+									<div class="col-xs-6 col-sm-3 col-md-3">
+										<input type="number" class="form-control input-sm" id="width" name="tesseraWidth" placeholder="width (px)" value="30">
+									</div>
+									<div class="col-xs-6 col-sm-3 col-md-3">
+										<input type="number" class="form-control input-sm col-sm-6" id="height" name="tesseraHeight" placeholder="height (px)" value="30">
+									</div>
+								</div>
+							</div>
+							<div class="form-group ">
+								<label for="width">Filter</label>
+								<div class="row">
+									<div class="col-xs-6 col-sm-3 col-md-3">
+										<input type="color" class="form-control input-sm" id="width" name="filter[color]" placeholder="filter color" value="#16a085">
+									</div>
+									<div class="col-xs-6 col-sm-3 col-md-3">
+										<input type="number" min="0" max="1" step="0.05" class="form-control input-sm col-sm-6" id="height" name="filter[opacity]" placeholder="filter opacity" value="0.9">
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label style="display:block">Draw &nbsp;&nbsp;</label>
+								<label class="radio-inline">
+									<input type="radio" name="gradual[enable]" value="true" checked> Gradual
+								</label>
+								<label class="radio-inline">
+									<input type="radio" name="gradual[enable]" value="false"> Simultaneous
+								</label>
+							</div>
+
+							<div class="form-group">
+								<label style="display:block">Animation &nbsp;&nbsp;</label>
+								<label class="radio-inline">
+									<input type="radio" name="animate[enable]" value="true" checked> Enable
+								</label>
+								<label class="radio-inline">
+									<input type="radio" name="animate[enable]" value="false"> Disable
+								</label>
+							</div>
+
+
+							<div class="row">
+								<div class="col-xs-6 col-sm-3">
+									<div class="form-group ">
+										<label for="width">Draw step</label>
+											<input type="number" class="form-control input-sm" name="gradual[step]" placeholder="speed" value="10">
+									</div>
+								</div>
+								<div class="col-xs-6 col-sm-3">
+									<div class="form-group ">
+										<label for="width">Animate step</label>
+											<input type="number" class="form-control input-sm" name="animate[step]" placeholder="speed" value="2">
+									</div>
+								</div>
+							</div>
+
+
+
+						</form>
+					</div>
+				</div>
+
+
+			</div>
+			<div id="tesserae-bg"></div>
+		</div>
+
+		<footer class="container">
+			Authored by <a href="https://github.com/TheT0dd">Christopher Varakliotis</a>
+			<span class="pull-right">view on <a href="https://github.com/TheT0dd/tesserae">GitHub</a> <img height="22" width="auto" src="img/github/GitHub-Mark-32px.png" alt="GitHub" /></span>
+		</footer>
+
+
+		<!-- tessera -->
+		<script type="text/javascript" src="/bundle/tesserae.js"></script>
+
+		<!-- demo code -->
+		<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.5.0/jquery.serialize-object.min.js"></script>
+
+		<script type="text/javascript">
+
+			var options = {
+				// container selector
+				container: '#tesserae-bg'
+			};
+
+			function getUpdatedOptions() {
+				var newOpts = $('form').serializeObject();
+				console.log(newOpts);
+				newOpts.gradual.enable = newOpts.gradual.enable === 'true' ? true : false;
+				newOpts.animate.enable = newOpts.animate.enable === 'true' ? true : false;
+				return $.extend({}, options, newOpts);
+			}
+
+			var tesserae = new Tesserae(getUpdatedOptions());
+
+			$('form :input').change(function() {
+				options = getUpdatedOptions();
+				console.log(options);
+				tesserae.destroy();
+				tesserae = new Tesserae(options);
+			});
+
+		</script>
+	</body>
+</html>
