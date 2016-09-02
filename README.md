@@ -6,7 +6,7 @@ Tesserae
 Tesserae is a small library that creates customizable and optionally animated mosaic patterns that can be used to replace dull/static/image backgrounds.
 
 Tesserae uses HTML5 Canvas instead of (hundreds of) DOM elements to create its backgrounds and `requestAnimationFrame` to handle its animations.
-The reasoning behind this lies in the performance gains of Immediate Mode (canvas) vs Retained Mode (DOM). You can read [here]([I'm an inline-style link](https://www.google.com) for more details.
+The reasoning behind this lies in the performance gains of Immediate Mode (canvas) vs Retained Mode (DOM). You can read [here](https://www.kirupa.com/html5/dom_vs_canvas.htm) for more details.
 
 Despite being faster and less memory taxing on modern desktop browsers, using canvas comes with its downsides:
 
