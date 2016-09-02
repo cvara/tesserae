@@ -79,8 +79,12 @@ gulp.task('watch', function() {
 
 // Build (base build tasks, for dev)
 gulp.task('build', function(callback) {
-	var start = new Date().getTime();
 	runSequence('clean', 'webpack', callback);
+});
+
+// Build dist
+gulp.task('dist', function(callback) {
+	runSequence('clean', 'webpack', 'uglify', callback);
 });
 
 // Run in dev mode with static pages

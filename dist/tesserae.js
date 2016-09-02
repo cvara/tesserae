@@ -79,13 +79,19 @@ var Tesserae =
 			} : _ref$randomcolor;
 			var _ref$filter = _ref.filter;
 			var filter = _ref$filter === undefined ? {
-				color: '#333',
+				color: '#000',
 				opacity: 0.6
 			} : _ref$filter;
 			var _ref$gradual = _ref.gradual;
-			var gradual = _ref$gradual === undefined ? false : _ref$gradual;
+			var gradual = _ref$gradual === undefined ? {
+				enable: true,
+				step: 10
+			} : _ref$gradual;
 			var _ref$animate = _ref.animate;
-			var animate = _ref$animate === undefined ? false : _ref$animate;
+			var animate = _ref$animate === undefined ? {
+				enable: true,
+				step: 2
+			} : _ref$animate;
 
 			_classCallCheck(this, Tesserae);
 
