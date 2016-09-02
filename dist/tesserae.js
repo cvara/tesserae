@@ -43,7 +43,7 @@ var Tesserae =
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -53,69 +53,195 @@ var Tesserae =
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _tessera = __webpack_require__(1);
+
+	var _tessera2 = _interopRequireDefault(_tessera);
+
+	var _utils = __webpack_require__(2);
+
+	var _utils2 = _interopRequireDefault(_utils);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Tesserae = function () {
-		function Tesserae(opts) {
+		function Tesserae(_ref) {
+			var container = _ref.container;
+			var _ref$tesseraWidth = _ref.tesseraWidth;
+			var tesseraWidth = _ref$tesseraWidth === undefined ? 30 : _ref$tesseraWidth;
+			var _ref$tesseraHeight = _ref.tesseraHeight;
+			var tesseraHeight = _ref$tesseraHeight === undefined ? 30 : _ref$tesseraHeight;
+			var _ref$randomcolor = _ref.randomcolor;
+			var randomcolor = _ref$randomcolor === undefined ? {
+				hue: 'monochrome',
+				luminosity: 'light'
+			} : _ref$randomcolor;
+			var _ref$filter = _ref.filter;
+			var filter = _ref$filter === undefined ? {
+				color: '#333',
+				opacity: 0.6
+			} : _ref$filter;
+			var _ref$gradual = _ref.gradual;
+			var gradual = _ref$gradual === undefined ? false : _ref$gradual;
+			var _ref$animate = _ref.animate;
+			var animate = _ref$animate === undefined ? false : _ref$animate;
+
 			_classCallCheck(this, Tesserae);
 
-			this.options = opts;
-			this.draw(opts);
-			var lazyDraw = this._debounce(this.draw, 200).bind(this);
-			this.resizehandler = function (event) {
-				lazyDraw(opts);
-			};
-			window.addEventListener('resize', this.resizehandler);
+			// container is the only required parameter
+			if (!container) {
+				throw 'Tesserae Error: container option is missing.';
+			}
+
+			// properties
+			this.containerEl = document.querySelector(container);
+
+			// make sure container selector gives an existing dom element
+			if (!this.containerEl) {
+				throw 'Tesserae Error: no container element found: ' + container;
+			}
+
+			this.tesseraWidth = parseInt(tesseraWidth, 10);
+			this.tesseraHeight = parseInt(tesseraHeight, 10);
+			this.randomcolor = randomcolor;
+			this.filter = filter;
+			this.gradual = gradual;
+			this.animate = animate;
+			this.containerStyle = window.getComputedStyle(this.containerEl, null);
+
+			// all drawn tessera shapes are stored here
+			this.tesserae = [];
+
+			// render version
+			// NOTE: this is used to avoid issues with re-renders
+			// while current animation has not finished yet
+			this.renderVersion = 0;
+
+			// init
+			this.init();
 		}
 
 		_createClass(Tesserae, [{
+			key: 'init',
+			value: function init() {
+				// lazy draw function (debounced)
+				this.lazyDraw = _utils2.default.debounce(this.draw, 200).bind(this);
+				window.addEventListener('resize', this.lazyDraw);
+				// draw for the first time
+				this.draw();
+			}
+		}, {
 			key: 'destroy',
 			value: function destroy() {
-				var containerEl = document.querySelector(this.options.container);
-				this._emptyElement(containerEl);
-				window.removeEventListener('resize', this.resizehandler);
+				this._emptyContainer();
+				this._restoreContainer();
+				this.tesserae.length = 0;
+				window.removeEventListener('resize', this.lazyDraw);
 			}
 		}, {
 			key: 'draw',
-			value: function draw(_ref) {
-				var container = _ref.container;
-				var _ref$tesseraWidth = _ref.tesseraWidth;
-				var tesseraWidth = _ref$tesseraWidth === undefined ? 30 : _ref$tesseraWidth;
-				var _ref$tesseraHeight = _ref.tesseraHeight;
-				var tesseraHeight = _ref$tesseraHeight === undefined ? 30 : _ref$tesseraHeight;
+			value: function draw() {
+				this.renderVersion++;
 
-				var containerEl = document.querySelector(container);
-				var canvas = this._createCanvas(containerEl);
-				this._drawBackground(canvas, tesseraWidth, tesseraHeight);
+				this._editContainer();
+				this._prepareCanvas();
+				this._generateTesserae();
+				this._addFilter();
+
+				// gradually show tesserae in random order
+				if (this.gradual && this.gradual.enable) {
+					var clone = _utils2.default.cloneArrayShallow(this.tesserae);
+					_utils2.default.shuffle(clone);
+					this._drawTesseraeGradually(clone, 0, this.gradual.step || 1, this.renderVersion);
+				}
+				// show all tesserae at once
+				else {
+						this._drawTesserae(this.tesserae);
+					}
 			}
 		}, {
-			key: '_createCanvas',
-			value: function _createCanvas(containerEl) {
-				var canvas = document.createElement('canvas');
-				canvas.id = 'tesserae';
-				canvas.width = containerEl.offsetWidth;
-				canvas.height = containerEl.offsetHeight;
-				this._emptyElement(containerEl);
-				containerEl.appendChild(canvas);
-				return canvas;
+			key: '_editContainer',
+			value: function _editContainer() {
+				// if parent has a non-static position, make it relative
+				if (this.containerStyle.getPropertyValue('position') === 'static') {
+					this.containerEl.style.position = 'relative';
+				}
+				this.containerEl.style.boxSizing = 'border-box';
 			}
 		}, {
-			key: '_drawBackground',
-			value: function _drawBackground(canvas, tesseraWidth, tesseraHeight) {
-				var xMod = canvas.offsetWidth % tesseraWidth;
-				var yMod = canvas.offsetHeight % tesseraHeight;
+			key: '_restoreContainer',
+			value: function _restoreContainer() {
+				// TODO: restore original position & box-sizing of container
+			}
+		}, {
+			key: '_addFilter',
+			value: function _addFilter() {
+				if (!this.filter || this.filterEl) {
+					return;
+				}
 
-				var fullCols = Math.floor(canvas.offsetWidth / tesseraWidth);
+				// prepare element
+				var filterEl = this.filterEl = document.createElement('div');
+				filterEl.style.width = '100%';
+				filterEl.style.height = '100%';
+				filterEl.style.backgroundColor = this.filter.color;
+				filterEl.style.opacity = this.filter.opacity;
+				filterEl.style.position = 'absolute';
+				filterEl.style.zIndex = 1;
+				filterEl.style.top = 0;
+
+				this.containerEl.appendChild(filterEl);
+			}
+		}, {
+			key: '_prepareCanvas',
+			value: function _prepareCanvas() {
+				var cs = this.containerStyle;
+
+				var elementHeight = this.containerEl.clientHeight; // height with padding
+				var elementWidth = this.containerEl.clientWidth; // width with padding
+
+				elementHeight -= parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+				elementWidth -= parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+
+				// canvas exists
+				if (this.ctx && this.canvas) {
+					this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+				}
+				// canvas not created yet
+				else {
+						// create new canvas
+						this.canvas = document.createElement('canvas');
+						this.canvas.id = 'tesserae';
+						this._emptyContainer();
+						this.containerEl.appendChild(this.canvas);
+						this.ctx = this.canvas.getContext('2d');
+					}
+
+				// set canvas width in any case
+				this.canvas.width = elementWidth;
+				this.canvas.height = elementHeight;
+			}
+		}, {
+			key: '_generateTesserae',
+			value: function _generateTesserae() {
+				var xMod = this.canvas.offsetWidth % this.tesseraWidth;
+				var yMod = this.canvas.offsetHeight % this.tesseraHeight;
+
+				var fullCols = Math.floor(this.canvas.offsetWidth / this.tesseraWidth);
 				var allCols = xMod > 0 ? fullCols + 2 : fullCols;
 
-				var fullRows = Math.floor(canvas.offsetHeight / tesseraHeight);
+				var fullRows = Math.floor(this.canvas.offsetHeight / this.tesseraHeight);
 				var allRows = yMod > 0 ? fullRows + 2 : fullRows;
+
+				// empty tesserae array
+				this.tesserae.length = 0;
 
 				var posY = 0;
 
 				for (var r = 0; r < allRows; r++) {
 					var posX = 0;
-					var actualHeight = tesseraHeight;
+					var actualHeight = this.tesseraHeight;
 					if (r === 0 && yMod > 0) {
 						actualHeight = Math.floor(yMod / 2);
 					}
@@ -124,65 +250,752 @@ var Tesserae =
 					}
 
 					for (var c = 0; c < allCols; c++) {
-						var actualWidth = tesseraWidth;
+						var actualWidth = this.tesseraWidth;
 						if (c === 0 && xMod > 0) {
 							actualWidth = Math.floor(xMod / 2);
 						}
 						if (c === allCols - 1 && xMod > 0) {
 							actualWidth = Math.ceil(xMod / 2);
 						}
-						this._drawTessera(canvas, posX, posY, actualWidth, actualHeight);
+						var tessera = new _tessera2.default({
+							x: posX,
+							y: posY,
+							width: actualWidth,
+							height: actualHeight,
+							hslArray: _utils2.default.getRandomColor(this.randomcolor, 'hslArray')
+						});
+						this.tesserae.push(tessera);
 						posX = posX + actualWidth;
 					}
 					posY = posY + actualHeight;
 				}
 			}
 		}, {
-			key: '_drawTessera',
-			value: function _drawTessera(canvas, x, y, width, height) {
-				var ctx = canvas.getContext('2d');
-				ctx.fillStyle = this.getRandomColor();
-				ctx.fillRect(x, y, width, height);
+			key: '_drawTesserae',
+			value: function _drawTesserae(tesserae) {
+				for (var i = 0, len = tesserae.length; i < len; i++) {
+					tesserae[i].draw(this.ctx, this.animate);
+				}
 			}
 		}, {
-			key: 'getRandomColor',
-			value: function getRandomColor() {
-				return '#' + Math.floor(Math.random() * 16777215).toString(16);
+			key: '_drawTesseraeGradually',
+			value: function _drawTesseraeGradually(tesserae, i, step, renderVersion) {
+				var _this = this;
+
+				if (i in tesserae) {
+					var s = step;
+					while (s-- > 0 && tesserae[i]) {
+						tesserae[i++].draw(this.ctx, this.animate);
+					}
+					requestAnimationFrame(function () {
+						if (renderVersion === _this.renderVersion) {
+							_this._drawTesseraeGradually(tesserae, i, step, renderVersion);
+						}
+					});
+				}
 			}
 		}, {
-			key: '_emptyElement',
-			value: function _emptyElement(el) {
+			key: '_emptyContainer',
+			value: function _emptyContainer() {
+				var el = this.containerEl;
 				while (el.firstChild) {
 					el.removeChild(el.firstChild);
 				}
 			}
 		}, {
-			key: '_debounce',
-			value: function _debounce(func, wait, immediate) {
-				var timeout;
-				return function () {
-					var context = this,
-					    args = arguments;
-					var later = function later() {
-						timeout = null;
-						if (!immediate) {
-							func.apply(context, args);
-						}
-					};
-					var callNow = immediate && !timeout;
-					clearTimeout(timeout);
-					timeout = setTimeout(later, wait);
-					if (callNow) {
-						func.apply(context, args);
-					}
-				};
+			key: '_getRandomTessera',
+			value: function _getRandomTessera() {
+				return this.tesserae[_utils2.default.getRandomInt(0, this.tesserae.length)];
 			}
 		}]);
 
 		return Tesserae;
 	}();
 
-		exports.default = Tesserae;
+	exports.default = Tesserae;
+	module.exports = exports['default'];
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _utils = __webpack_require__(2);
+
+	var _utils2 = _interopRequireDefault(_utils);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Tessera = function () {
+		function Tessera(_ref) {
+			var x = _ref.x;
+			var y = _ref.y;
+			var width = _ref.width;
+			var height = _ref.height;
+			var hsl = _ref.hsl;
+			var hslArray = _ref.hslArray;
+
+			_classCallCheck(this, Tessera);
+
+			this.x = x;
+			this.y = y;
+			this.width = width;
+			this.height = height;
+			this.hsl = _utils2.default.arrayToHsl(hslArray);
+			this.hslArray = hslArray;
+		}
+
+		_createClass(Tessera, [{
+			key: 'draw',
+			value: function draw(ctx, animate) {
+				if (animate && animate.enable) {
+					this.drawAnimated(ctx, animate.step);
+				} else {
+					ctx.fillStyle = this.hsl;
+					ctx.fillRect(this.x, this.y, this.width, this.height);
+				}
+			}
+		}, {
+			key: 'drawAnimated',
+			value: function drawAnimated(ctx) {
+				var _this = this;
+
+				var animateStep = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
+
+				// initial animation step
+				if (!this._hslStepArray) {
+					this._hslStepArray = [this.hslArray[0], this.hslArray[1], 100];
+				}
+
+				// convert current step color to hsl string
+				ctx.fillStyle = _utils2.default.arrayToHsl(this._hslStepArray);
+				// draw rectangle
+				ctx.fillRect(this.x, this.y, this.width, this.height);
+
+				// stop condition
+				if (this._hslStepArray[2] === this.hslArray[2]) {
+					delete this._hslStepArray;
+					return;
+				}
+
+				// calculate color for next step
+				this._hslStepArray[2] = Math.max(this._hslStepArray[2] - animateStep, this.hslArray[2]);
+				requestAnimationFrame(function () {
+					_this.drawAnimated(ctx);
+				});
+			}
+		}]);
+
+		return Tessera;
+	}();
+
+	exports.default = Tessera;
+	module.exports = exports['default'];
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _randomcolor = __webpack_require__(3);
+
+	var _randomcolor2 = _interopRequireDefault(_randomcolor);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+	var Utils = window.Utils = {};
+
+	// Returns debounced version of function
+	// Code borrowed from underscore:
+	// http://underscorejs.org/docs/underscore.html#section-83
+	Utils.debounce = function (func, wait, immediate) {
+	    var timeout = void 0;
+	    return function () {
+	        var context = this,
+	            args = arguments;
+	        var later = function later() {
+	            timeout = null;
+	            if (!immediate) {
+	                func.apply(context, args);
+	            }
+	        };
+	        var callNow = immediate && !timeout;
+	        clearTimeout(timeout);
+	        timeout = setTimeout(later, wait);
+	        if (callNow) {
+	            func.apply(context, args);
+	        }
+	    };
+	};
+
+	// Returns random int between min (inclusive) and max (exclusive)
+	Utils.getRandomInt = function (min, max) {
+	    min = Math.ceil(min);
+	    max = Math.floor(max);
+	    return Math.floor(Math.random() * (max - min)) + min;
+	};
+
+	// Returns random color using a random color generator
+	// see: https://github.com/davidmerfield/randomColor
+	Utils.getRandomColor = function (opts, format) {
+	    opts.format = format;
+	    var color = [];
+	    do {
+	        color = (0, _randomcolor2.default)(opts);
+	    } while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
+	    return color;
+	};
+
+	// Fisher-Yates shuffle
+	Utils.shuffle = function (array) {
+	    var m = array.length,
+	        t = void 0,
+	        i = void 0;
+
+	    // While there remain elements to shuffle…
+	    while (m) {
+
+	        // Pick a remaining element…
+	        i = Math.floor(Math.random() * m--);
+
+	        // And swap it with the current element.
+	        t = array[m];
+	        array[m] = array[i];
+	        array[i] = t;
+	    }
+
+	    return array;
+	};
+
+	// Returns shallow clone of array
+	Utils.cloneArrayShallow = function (array) {
+	    var clone = [];
+	    for (var i = 0, len = array.length; i < len; i++) {
+	        clone[i] = array[i];
+	    }
+	    return clone;
+	};
+
+	// Returns rgb representation of a hex color code
+	Utils.hexToRgb = function (hex) {
+	    var rgb = [];
+	    var fail = false;
+	    var original = hex;
+
+	    hex = hex.replace(/#/, '');
+
+	    if (hex.length === 3) {
+	        hex = hex + hex;
+	    }
+
+	    for (var i = 0; i < 6; i += 2) {
+	        rgb.push(parseInt(hex.substr(i, 2), 16));
+	        fail = fail || rgb[rgb.length - 1].toString() === 'NaN';
+	    }
+
+	    return !fail && rgb;
+	};
+
+	// Returns hsl representation of an rgb color code
+	Utils.rgbToHsl = function (r, g, b) {
+
+	    r /= 255;
+	    g /= 255;
+	    b /= 255;
+
+	    var max = Math.max(r, g, b),
+	        min = Math.min(r, g, b);
+	    var h = void 0,
+	        s = void 0,
+	        l = (max + min) / 2;
+
+	    if (max === min) {
+	        h = s = 0;
+	    } else {
+	        var d = max - min;
+	        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+	        switch (max) {
+	            case r:
+	                h = (g - b) / d + (g < b ? 6 : 0);
+	                break;
+	            case g:
+	                h = (b - r) / d + 2;
+	                break;
+	            case b:
+	                h = (r - g) / d + 4;
+	                break;
+	        }
+
+	        h /= 6;
+	    }
+
+	    return [h * 100 + 0.5 | 0, (s * 100 + 0.5 | 0) + '%', (l * 100 + 0.5 | 0) + '%'];
+	};
+
+	// Returns hsl representation of a hex color code
+	Utils.hexToHsl = function (hex) {
+	    return Utils.rgbToHsl.apply(Utils, _toConsumableArray(Utils.hexToRgb(hex)));
+	};
+
+	// Returns array representation of an hsl color string
+	Utils.arrayToHsl = function (array) {
+	    return 'hsl(' + array[0] + ',' + array[1] + '%,' + array[2] + '%)';
+	};
+
+	exports.default = Utils;
+	module.exports = exports['default'];
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;// randomColor by David Merfield under the CC0 license
+	// https://github.com/davidmerfield/randomColor/
+
+	;(function(root, factory) {
+
+	  // Support AMD
+	  if (true) {
+	    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+
+	  // Support CommonJS
+	  } else if (typeof exports === 'object') {
+	    var randomColor = factory();
+
+	    // Support NodeJS & Component, which allow module.exports to be a function
+	    if (typeof module === 'object' && module && module.exports) {
+	      exports = module.exports = randomColor;
+	    }
+
+	    // Support CommonJS 1.1.1 spec
+	    exports.randomColor = randomColor;
+
+	  // Support vanilla script loading
+	  } else {
+	    root.randomColor = factory();
+	  }
+
+	}(this, function() {
+
+	  // Seed to get repeatable colors
+	  var seed = null;
+
+	  // Shared color dictionary
+	  var colorDictionary = {};
+
+	  // Populate the color dictionary
+	  loadColorBounds();
+
+	  var randomColor = function (options) {
+
+	    options = options || {};
+
+	    // Check if there is a seed and ensure it's an
+	    // integer. Otherwise, reset the seed value.
+	    if (options.seed && options.seed === parseInt(options.seed, 10)) {
+	      seed = options.seed;
+
+	    // A string was passed as a seed
+	    } else if (typeof options.seed === 'string') {
+	      seed = stringToInteger(options.seed);
+
+	    // Something was passed as a seed but it wasn't an integer or string
+	    } else if (options.seed !== undefined && options.seed !== null) {
+	      throw new TypeError('The seed value must be an integer or string');
+
+	    // No seed, reset the value outside.
+	    } else {
+	      seed = null;
+	    }
+
+	    var H,S,B;
+
+	    // Check if we need to generate multiple colors
+	    if (options.count !== null && options.count !== undefined) {
+
+	      var totalColors = options.count,
+	          colors = [];
+
+	      options.count = null;
+
+	      while (totalColors > colors.length) {
+
+	        // Since we're generating multiple colors,
+	        // incremement the seed. Otherwise we'd just
+	        // generate the same color each time...
+	        if (seed && options.seed) options.seed += 1;
+
+	        colors.push(randomColor(options));
+	      }
+
+	      options.count = totalColors;
+
+	      return colors;
+	    }
+
+	    // First we pick a hue (H)
+	    H = pickHue(options);
+
+	    // Then use H to determine saturation (S)
+	    S = pickSaturation(H, options);
+
+	    // Then use S and H to determine brightness (B).
+	    B = pickBrightness(H, S, options);
+
+	    // Then we return the HSB color in the desired format
+	    return setFormat([H,S,B], options);
+	  };
+
+	  function pickHue (options) {
+
+	    var hueRange = getHueRange(options.hue),
+	        hue = randomWithin(hueRange);
+
+	    // Instead of storing red as two seperate ranges,
+	    // we group them, using negative numbers
+	    if (hue < 0) {hue = 360 + hue;}
+
+	    return hue;
+
+	  }
+
+	  function pickSaturation (hue, options) {
+
+	    if (options.luminosity === 'random') {
+	      return randomWithin([0,100]);
+	    }
+
+	    if (options.hue === 'monochrome') {
+	      return 0;
+	    }
+
+	    var saturationRange = getSaturationRange(hue);
+
+	    var sMin = saturationRange[0],
+	        sMax = saturationRange[1];
+
+	    switch (options.luminosity) {
+
+	      case 'bright':
+	        sMin = 55;
+	        break;
+
+	      case 'dark':
+	        sMin = sMax - 10;
+	        break;
+
+	      case 'light':
+	        sMax = 55;
+	        break;
+	   }
+
+	    return randomWithin([sMin, sMax]);
+
+	  }
+
+	  function pickBrightness (H, S, options) {
+
+	    var bMin = getMinimumBrightness(H, S),
+	        bMax = 100;
+
+	    switch (options.luminosity) {
+
+	      case 'dark':
+	        bMax = bMin + 20;
+	        break;
+
+	      case 'light':
+	        bMin = (bMax + bMin)/2;
+	        break;
+
+	      case 'random':
+	        bMin = 0;
+	        bMax = 100;
+	        break;
+	    }
+
+	    return randomWithin([bMin, bMax]);
+	  }
+
+	  function setFormat (hsv, options) {
+
+	    switch (options.format) {
+
+	      case 'hsvArray':
+	        return hsv;
+
+	      case 'hslArray':
+	        return HSVtoHSL(hsv);
+
+	      case 'hsl':
+	        var hsl = HSVtoHSL(hsv);
+	        return 'hsl('+hsl[0]+', '+hsl[1]+'%, '+hsl[2]+'%)';
+
+	      case 'hsla':
+	        var hslColor = HSVtoHSL(hsv);
+	        return 'hsla('+hslColor[0]+', '+hslColor[1]+'%, '+hslColor[2]+'%, ' + Math.random() + ')';
+
+	      case 'rgbArray':
+	        return HSVtoRGB(hsv);
+
+	      case 'rgb':
+	        var rgb = HSVtoRGB(hsv);
+	        return 'rgb(' + rgb.join(', ') + ')';
+
+	      case 'rgba':
+	        var rgbColor = HSVtoRGB(hsv);
+	        return 'rgba(' + rgbColor.join(', ') + ', ' + Math.random() + ')';
+
+	      default:
+	        return HSVtoHex(hsv);
+	    }
+
+	  }
+
+	  function getMinimumBrightness(H, S) {
+
+	    var lowerBounds = getColorInfo(H).lowerBounds;
+
+	    for (var i = 0; i < lowerBounds.length - 1; i++) {
+
+	      var s1 = lowerBounds[i][0],
+	          v1 = lowerBounds[i][1];
+
+	      var s2 = lowerBounds[i+1][0],
+	          v2 = lowerBounds[i+1][1];
+
+	      if (S >= s1 && S <= s2) {
+
+	         var m = (v2 - v1)/(s2 - s1),
+	             b = v1 - m*s1;
+
+	         return m*S + b;
+	      }
+
+	    }
+
+	    return 0;
+	  }
+
+	  function getHueRange (colorInput) {
+
+	    if (typeof parseInt(colorInput) === 'number') {
+
+	      var number = parseInt(colorInput);
+
+	      if (number < 360 && number > 0) {
+	        return [number, number];
+	      }
+
+	    }
+
+	    if (typeof colorInput === 'string') {
+
+	      if (colorDictionary[colorInput]) {
+	        var color = colorDictionary[colorInput];
+	        if (color.hueRange) {return color.hueRange;}
+	      }
+	    }
+
+	    return [0,360];
+
+	  }
+
+	  function getSaturationRange (hue) {
+	    return getColorInfo(hue).saturationRange;
+	  }
+
+	  function getColorInfo (hue) {
+
+	    // Maps red colors to make picking hue easier
+	    if (hue >= 334 && hue <= 360) {
+	      hue-= 360;
+	    }
+
+	    for (var colorName in colorDictionary) {
+	       var color = colorDictionary[colorName];
+	       if (color.hueRange &&
+	           hue >= color.hueRange[0] &&
+	           hue <= color.hueRange[1]) {
+	          return colorDictionary[colorName];
+	       }
+	    } return 'Color not found';
+	  }
+
+	  function randomWithin (range) {
+	    if (seed === null) {
+	      return Math.floor(range[0] + Math.random()*(range[1] + 1 - range[0]));
+	    } else {
+	      //Seeded random algorithm from http://indiegamr.com/generate-repeatable-random-numbers-in-js/
+	      var max = range[1] || 1;
+	      var min = range[0] || 0;
+	      seed = (seed * 9301 + 49297) % 233280;
+	      var rnd = seed / 233280.0;
+	      return Math.floor(min + rnd * (max - min));
+	    }
+	  }
+
+	  function HSVtoHex (hsv){
+
+	    var rgb = HSVtoRGB(hsv);
+
+	    function componentToHex(c) {
+	        var hex = c.toString(16);
+	        return hex.length == 1 ? '0' + hex : hex;
+	    }
+
+	    var hex = '#' + componentToHex(rgb[0]) + componentToHex(rgb[1]) + componentToHex(rgb[2]);
+
+	    return hex;
+
+	  }
+
+	  function defineColor (name, hueRange, lowerBounds) {
+
+	    var sMin = lowerBounds[0][0],
+	        sMax = lowerBounds[lowerBounds.length - 1][0],
+
+	        bMin = lowerBounds[lowerBounds.length - 1][1],
+	        bMax = lowerBounds[0][1];
+
+	    colorDictionary[name] = {
+	      hueRange: hueRange,
+	      lowerBounds: lowerBounds,
+	      saturationRange: [sMin, sMax],
+	      brightnessRange: [bMin, bMax]
+	    };
+
+	  }
+
+	  function loadColorBounds () {
+
+	    defineColor(
+	      'monochrome',
+	      null,
+	      [[0,0],[100,0]]
+	    );
+
+	    defineColor(
+	      'red',
+	      [-26,18],
+	      [[20,100],[30,92],[40,89],[50,85],[60,78],[70,70],[80,60],[90,55],[100,50]]
+	    );
+
+	    defineColor(
+	      'orange',
+	      [19,46],
+	      [[20,100],[30,93],[40,88],[50,86],[60,85],[70,70],[100,70]]
+	    );
+
+	    defineColor(
+	      'yellow',
+	      [47,62],
+	      [[25,100],[40,94],[50,89],[60,86],[70,84],[80,82],[90,80],[100,75]]
+	    );
+
+	    defineColor(
+	      'green',
+	      [63,178],
+	      [[30,100],[40,90],[50,85],[60,81],[70,74],[80,64],[90,50],[100,40]]
+	    );
+
+	    defineColor(
+	      'blue',
+	      [179, 257],
+	      [[20,100],[30,86],[40,80],[50,74],[60,60],[70,52],[80,44],[90,39],[100,35]]
+	    );
+
+	    defineColor(
+	      'purple',
+	      [258, 282],
+	      [[20,100],[30,87],[40,79],[50,70],[60,65],[70,59],[80,52],[90,45],[100,42]]
+	    );
+
+	    defineColor(
+	      'pink',
+	      [283, 334],
+	      [[20,100],[30,90],[40,86],[60,84],[80,80],[90,75],[100,73]]
+	    );
+
+	  }
+
+	  function HSVtoRGB (hsv) {
+
+	    // this doesn't work for the values of 0 and 360
+	    // here's the hacky fix
+	    var h = hsv[0];
+	    if (h === 0) {h = 1;}
+	    if (h === 360) {h = 359;}
+
+	    // Rebase the h,s,v values
+	    h = h/360;
+	    var s = hsv[1]/100,
+	        v = hsv[2]/100;
+
+	    var h_i = Math.floor(h*6),
+	      f = h * 6 - h_i,
+	      p = v * (1 - s),
+	      q = v * (1 - f*s),
+	      t = v * (1 - (1 - f)*s),
+	      r = 256,
+	      g = 256,
+	      b = 256;
+
+	    switch(h_i) {
+	      case 0: r = v; g = t; b = p;  break;
+	      case 1: r = q; g = v; b = p;  break;
+	      case 2: r = p; g = v; b = t;  break;
+	      case 3: r = p; g = q; b = v;  break;
+	      case 4: r = t; g = p; b = v;  break;
+	      case 5: r = v; g = p; b = q;  break;
+	    }
+
+	    var result = [Math.floor(r*255), Math.floor(g*255), Math.floor(b*255)];
+	    return result;
+	  }
+
+	  function HSVtoHSL (hsv) {
+	    var h = hsv[0],
+	      s = hsv[1]/100,
+	      v = hsv[2]/100,
+	      k = (2-s)*v;
+
+	    return [
+	      h,
+	      Math.round(s*v / (k<1 ? k : 2-k) * 10000) / 100,
+	      k/2 * 100
+	    ];
+	  }
+
+	  function stringToInteger (string) {
+	    var total = 0
+	    for (var i = 0; i !== string.length; i++) {
+	      if (total >= Number.MAX_SAFE_INTEGER) break;
+	      total += string.charCodeAt(i)
+	    }
+	    return total
+	  }
+
+	  return randomColor;
+	}));
+
 
 /***/ }
 /******/ ]);

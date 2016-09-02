@@ -12,6 +12,7 @@ var uglify = require('gulp-uglify');
 var livereload = require('gulp-livereload');
 var del = require('del');
 var runSequence = require('run-sequence');
+var rename = require('gulp-rename');
 
 var source = __dirname + '/src';
 var dist = __dirname + '/dist';
@@ -45,9 +46,12 @@ gulp.task('webpack', function() {
 
 // Uglify output
 gulp.task('uglify', function() {
-	return gulp.src(dist + '/js/**/*.js')
+	return gulp.src(dist + '/tesserae.js')
 		.pipe(uglify())
-		.pipe(gulp.dest(dist + '/js'));
+		.pipe(rename({
+			suffix: '.min'
+		}))
+		.pipe(gulp.dest(dist));
 });
 
 // Clean
