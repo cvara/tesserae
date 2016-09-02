@@ -22,9 +22,15 @@ class Tesserae {
 			opacity: 0.6
 		},
 		// gradual: false or object
-		gradual = false,
+		gradual = {
+			enable: true,
+			step: 10
+		},
 		// animate: false or object
-		animate = false
+		animate = {
+			enable: true,
+			step: 2
+		}
 	}) {
 
 		// container is the only required parameter
