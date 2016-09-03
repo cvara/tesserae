@@ -115,8 +115,8 @@ var t = new Tesserae({
 `default`:
 ```js
 randomcolor = {
-  hue: 'purple',
-  luminosity: 'bright'
+  hue: 'monochrome',
+  luminosity: 'light'
 }
 ```
 
