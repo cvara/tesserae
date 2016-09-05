@@ -156,15 +156,24 @@
 							</div>
 
 							<div class="form-group">
-								<label style="display:block">Animation &nbsp;&nbsp;</label>
+								<label style="display:block">Animation  &nbsp;&nbsp;</label>
 								<label class="radio-inline">
-									<input type="radio" name="animate[enable]" value="true" checked> Enable
+									<input type="radio" name="animate[enable]" value="true" checked> Enabled
 								</label>
 								<label class="radio-inline">
-									<input type="radio" name="animate[enable]" value="false"> Disable
+									<input type="radio" name="animate[enable]" value="false"> Disabled
 								</label>
 							</div>
 
+							<div class="form-group">
+								<label style="display:block">Live mode &nbsp;&nbsp;</label>
+								<label class="radio-inline">
+									<input type="radio" name="live" value="true" checked> Enabled
+								</label>
+								<label class="radio-inline">
+									<input type="radio" name="live" value="false"> Disabled
+								</label>
+							</div>
 
 							<div class="row">
 								<div class="col-xs-6 col-sm-3">
@@ -216,6 +225,7 @@
 				var newOpts = $('form').serializeObject();
 				newOpts.gradual.enable = newOpts.gradual.enable === 'true' ? true : false;
 				newOpts.animate.enable = newOpts.animate.enable === 'true' ? true : false;
+				newOpts.live = newOpts.live === 'true' ? true : false;
 				return $.extend({}, options, newOpts);
 			}
 

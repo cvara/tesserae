@@ -29,7 +29,9 @@ class Tesserae {
 		animate = {
 			enable: true,
 			step: 2
-		}
+		},
+		// periodically change color of random tiles
+		live = true
 	}) {
 
 		// container is the only required parameter
@@ -51,6 +53,7 @@ class Tesserae {
 		this.filter = filter;
 		this.gradual = gradual;
 		this.animate = animate;
+		this.live = live;
 		this.containerStyle = window.getComputedStyle(this.containerEl, null);
 
 		// all drawn tessera shapes are stored here
@@ -62,10 +65,10 @@ class Tesserae {
 		this.renderVersion = 0;
 
 		// init
-		this.init();
+		this._init();
 	}
 
-	init () {
+	_init () {
 		// lazy draw function (debounced)
 		this.lazyDraw = Utils.debounce(this.draw, 200).bind(this);
 		window.addEventListener('resize', this.lazyDraw);
@@ -76,6 +79,7 @@ class Tesserae {
 	destroy () {
 		this._emptyContainer();
 		this._restoreContainer();
+		clearTimeout(this.animateTimer);
 		this.tesserae.length = 0;
 		window.removeEventListener('resize', this.lazyDraw);
 	}
@@ -98,6 +102,19 @@ class Tesserae {
 		else {
 			this._drawTesserae(this.tesserae);
 		}
+
+		// start animating random tesserae
+		if (this.live) {
+			this._animateRandomTessera(this.live);
+		}
+	}
+
+	_animateRandomTessera () {
+		this.animateTimer = setTimeout(() => {
+			let randomTessera = this._getRandomTessera();
+			randomTessera.animateToColor(this.ctx, Utils.getRandomColor(this.randomcolor, 'hslArray'));
+			this._animateRandomTessera();
+		}, Utils.getRandomInt(50, 2000));
 	}
 
 	_editContainer () {

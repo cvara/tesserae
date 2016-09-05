@@ -144,5 +144,18 @@ Utils.arrayToHsl = function(array) {
 	return `hsl(${array[0]},${array[1]}%,${array[2]}%)`;
 };
 
+// Compares two hsl arrays and returns true when colors are equal
+Utils.equalHslArrays = function(array1, array2, loose) {
+	if (loose) {
+		return Math.abs(array1[0] - array2[0]) < 1 &&
+			Math.abs(array1[1] - array2[1] < 1) &&
+			Math.abs(array1[2] - array2[2] < 1);
+	}
+	return array1[0] === array2[0] && array1[1] === array2[1] && array1[2] === array2[2];
+};
+
+Utils.sign = function(n) {
+	return n === 0 ? 0 : n / Math.abs(n); 
+};
 
 module.exports = Utils;
