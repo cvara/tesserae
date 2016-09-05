@@ -211,7 +211,22 @@ var t = new Tesserae({
     step: 4
   }
 });
+
+
 ```
+### live
+
+`boolean`: Enables "live mode" which forces random tiles to periodically change color. It creates a subtle effect which is barely visible in same-hue backgrounds with filter. `default`: `true`
+
+
+```js
+// example: live backround
+var t = new Tesserae({
+  container: '#some-container',
+  live = true
+});
+```
+
 
 Methods
 ------------
@@ -246,3 +261,11 @@ var t = new Tesserae({
 // re-draw
 t.draw();
 ```
+
+
+## License
+
+[MIT](https://github.com/TheT0dd/tesserae/blob/master/LICENSE)
+
+___
+*Authored by Christopher Varakliotis*
