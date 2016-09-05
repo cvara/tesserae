@@ -63,7 +63,7 @@ new Tesserae({
 Usage
 ------------
 
-You can create a new Tesserae mosaic bacground inside a predefined html container by calling the constructor.
+You can create a new Tesserae mosaic background inside a predefined html container by calling the constructor.
 
 
 ```js
@@ -125,12 +125,24 @@ randomcolor = {
 Tesserae uses the [Random Color](https://randomcolor.llllll.li/) generator by David Merfield to generate random colors for each mosaic tile. For more info on all the available options you can check the [project's github page](https://github.com/davidmerfield/randomColor#options).
 
 ```js
-// example: bright variations of purple-based colors
-var t = new Tesserae({
+// example 1: bright variations of purple-based colors
+var t1 = new Tesserae({
   container: '#some-container',
   randomcolor = {
 	hue: 'purple',
 	luminosity: 'bright'
+  }
+});
+```
+
+Omitting the `randomcolor.hue` option will generate a truly random color:
+
+```js
+// example 2: dark variations of truly random colors
+var t2 = new Tesserae({
+  container: '#some-other-container',
+  randomcolor = {
+	luminosity: 'dark'
   }
 });
 ```
