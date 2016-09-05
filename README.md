@@ -267,5 +267,6 @@ t.draw();
 
 [MIT](https://github.com/TheT0dd/tesserae/blob/master/LICENSE)
 
-___
-*Authored by Christopher Varakliotis*
+
+## Author
+Christopher Varakliotis
