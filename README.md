@@ -93,6 +93,8 @@ var t = new Tesserae({
 });
 ```
 
+**NOTE:** Tesserae respects the `container` size. In fact, it expects `container` to be **visible** and of **non-zero width/height**. So for example, trying to initialize Tesserae on an empty `<div>` whose dimensions are not explicitly set would yield no result.  
+
 ### tesseraWidth
 
 `number`: The width of each mosaic tile in pixels. `default: 30`
@@ -222,7 +224,7 @@ t.destroy();
 
 Draws the mosaic. It is automatically called upon the creation of a new instance. Manually calling it again will re-draw the mosaic. It is a good idea to manually call `draw` anytime the container size changes.
 
-**NOTE: Tesserae listens for window resize events and re-draws automatically, so you need only worry about programatical size changes of the container (i.e. when you manually update its size)**
+**NOTE:** Tesserae listens for window resize events and re-draws automatically, so you need only worry about programatical size changes of the container (i.e. when you manually update its size)
 
 ```js
 // create a Tesserae instance
