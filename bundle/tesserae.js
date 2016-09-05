@@ -81,6 +81,8 @@ var Tesserae =
 				enable: true,
 				step: 2
 			} : _ref$animate;
+			var _ref$live = _ref.live;
+			var live = _ref$live === undefined ? true : _ref$live;
 
 			_classCallCheck(this, Tesserae);
 
@@ -103,6 +105,7 @@ var Tesserae =
 			this.filter = filter;
 			this.gradual = gradual;
 			this.animate = animate;
+			this.live = live;
 			this.containerStyle = window.getComputedStyle(this.containerEl, null);
 
 			// all drawn tessera shapes are stored here
@@ -114,12 +117,12 @@ var Tesserae =
 			this.renderVersion = 0;
 
 			// init
-			this.init();
+			this._init();
 		}
 
 		_createClass(Tesserae, [{
-			key: 'init',
-			value: function init() {
+			key: '_init',
+			value: function _init() {
 				// lazy draw function (debounced)
 				this.lazyDraw = Utils.debounce(this.draw, 200).bind(this);
 				window.addEventListener('resize', this.lazyDraw);
@@ -131,6 +134,7 @@ var Tesserae =
 			value: function destroy() {
 				this._emptyContainer();
 				this._restoreContainer();
+				clearTimeout(this.animateTimer);
 				this.tesserae.length = 0;
 				window.removeEventListener('resize', this.lazyDraw);
 			}
@@ -154,6 +158,22 @@ var Tesserae =
 				else {
 						this._drawTesserae(this.tesserae);
 					}
+
+				// start animating random tesserae
+				if (this.live) {
+					this._animateRandomTessera(this.live);
+				}
+			}
+		}, {
+			key: '_animateRandomTessera',
+			value: function _animateRandomTessera() {
+				var _this = this;
+
+				this.animateTimer = setTimeout(function () {
+					var randomTessera = _this._getRandomTessera();
+					randomTessera.animateToColor(_this.ctx, Utils.getRandomColor(_this.randomcolor, 'hslArray'));
+					_this._animateRandomTessera();
+				}, Utils.getRandomInt(50, 2000));
 			}
 		}, {
 			key: '_editContainer',
@@ -275,7 +295,7 @@ var Tesserae =
 		}, {
 			key: '_drawTesseraeGradually',
 			value: function _drawTesseraeGradually(tesserae, i, step, renderVersion) {
-				var _this = this;
+				var _this2 = this;
 
 				if (i in tesserae) {
 					var s = step;
@@ -283,8 +303,8 @@ var Tesserae =
 						tesserae[i++].draw(this.ctx, this.animate);
 					}
 					requestAnimationFrame(function () {
-						if (renderVersion === _this.renderVersion) {
-							_this._drawTesseraeGradually(tesserae, i, step, renderVersion);
+						if (renderVersion === _this2.renderVersion) {
+							_this2._drawTesseraeGradually(tesserae, i, step, renderVersion);
 						}
 					});
 				}
@@ -338,6 +358,8 @@ var Tesserae =
 			this.height = height;
 			this.hsl = Utils.arrayToHsl(hslArray);
 			this.hslArray = hslArray;
+			// true during initial draw
+			this.isDrawing = false;
 		}
 
 		_createClass(Tessera, [{
@@ -358,25 +380,87 @@ var Tesserae =
 				var animateStep = arguments.length <= 1 || arguments[1] === undefined ? 2 : arguments[1];
 
 				// initial animation step
-				if (!this._hslStepArray) {
-					this._hslStepArray = [this.hslArray[0], this.hslArray[1], 100];
+				if (!this._curDrawHslArray) {
+					this.isDrawing = true;
+					this._curDrawHslArray = [this.hslArray[0], this.hslArray[1], 100];
 				}
 
 				// convert current step color to hsl string
-				ctx.fillStyle = Utils.arrayToHsl(this._hslStepArray);
+				ctx.fillStyle = Utils.arrayToHsl(this._curDrawHslArray);
 				// draw rectangle
 				ctx.fillRect(this.x, this.y, this.width, this.height);
 
 				// stop condition
-				if (this._hslStepArray[2] === this.hslArray[2]) {
-					delete this._hslStepArray;
+				if (Utils.equalHslArrays(this._curDrawHslArray, this.hslArray)) {
+					delete this._curDrawHslArray;
+					this.isDrawing = false;
 					return;
 				}
 
 				// calculate color for next step
-				this._hslStepArray[2] = Math.max(this._hslStepArray[2] - animateStep, this.hslArray[2]);
+				this._curDrawHslArray[2] = Math.max(this._curDrawHslArray[2] - animateStep, this.hslArray[2]);
+				// next animation step
 				requestAnimationFrame(function () {
 					_this.drawAnimated(ctx);
+				});
+			}
+		}, {
+			key: 'animateToColor',
+			value: function animateToColor(ctx, newHslArray) {
+				var _this2 = this;
+
+				// initial animation step
+				if (!this._curAnimateHslArray) {
+
+					// don't change color if initial draw not finished yet
+					if (this.isDrawing) {
+						return;
+					}
+
+					// start from old color
+					this._curAnimateHslArray = Utils.cloneArrayShallow(this.hslArray);
+					// target new color
+					this.hslArray = newHslArray;
+					// how many frames the animation will take to finish
+					var frames = 40;
+					// animation step array
+					this._stepHsl = [];
+					// hue step
+					var hueDiff = this.hslArray[0] - this._curAnimateHslArray[0];
+					var hueDiffAbs = Math.abs(hueDiff);
+					var hueDiffSign = Utils.sign(this.hslArray[0] - this._curAnimateHslArray[0]);
+					// take the shortest angle when animating hue
+					if (hueDiffAbs > 180) {
+						this._stepHsl[0] = (hueDiffAbs - 360) / frames * hueDiffSign;
+					} else {
+						this._stepHsl[0] = hueDiffAbs / frames * hueDiffSign;
+					}
+					// saturation step
+					this._stepHsl[1] = (this.hslArray[1] - this._curAnimateHslArray[1]) / frames;
+					// lightness step
+					this._stepHsl[2] = (this.hslArray[2] - this._curAnimateHslArray[2]) / frames;
+				}
+
+				// convert current step color to hsl string
+				ctx.fillStyle = Utils.arrayToHsl(this._curAnimateHslArray);
+				// draw rectangle
+				ctx.fillRect(this.x, this.y, this.width, this.height);
+
+				// stop condition
+				if (Utils.equalHslArrays(this._curAnimateHslArray, this.hslArray, true)) {
+					delete this._curAnimateHslArray;
+					return;
+				}
+
+				// calculate color for next step
+				var stepH = this._curAnimateHslArray[0] + this._stepHsl[0];
+				stepH = stepH > 360 ? stepH % 360 : stepH < 0 ? 360 + stepH : stepH;
+				var stepS = this._curAnimateHslArray[1] + this._stepHsl[1];
+				var stepL = this._curAnimateHslArray[2] + this._stepHsl[2];
+				this._curAnimateHslArray = [stepH, stepS, stepL];
+				// next animation step
+				requestAnimationFrame(function () {
+					_this2.animateToColor(ctx, newHslArray);
 				});
 			}
 		}]);
@@ -402,141 +486,153 @@ var Tesserae =
 	// Code borrowed from underscore:
 	// http://underscorejs.org/docs/underscore.html#section-83
 	Utils.debounce = function (func, wait, immediate) {
-	    var timeout = void 0;
-	    return function () {
-	        var context = this,
-	            args = arguments;
-	        var later = function later() {
-	            timeout = null;
-	            if (!immediate) {
-	                func.apply(context, args);
-	            }
-	        };
-	        var callNow = immediate && !timeout;
-	        clearTimeout(timeout);
-	        timeout = setTimeout(later, wait);
-	        if (callNow) {
-	            func.apply(context, args);
-	        }
-	    };
+		var timeout = void 0;
+		return function () {
+			var context = this,
+			    args = arguments;
+			var later = function later() {
+				timeout = null;
+				if (!immediate) {
+					func.apply(context, args);
+				}
+			};
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) {
+				func.apply(context, args);
+			}
+		};
 	};
 
 	// Returns random int between min (inclusive) and max (exclusive)
 	Utils.getRandomInt = function (min, max) {
-	    min = Math.ceil(min);
-	    max = Math.floor(max);
-	    return Math.floor(Math.random() * (max - min)) + min;
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min)) + min;
 	};
 
 	// Returns random color using a random color generator
 	// see: https://github.com/davidmerfield/randomColor
 	Utils.getRandomColor = function (opts, format) {
-	    opts.format = format;
-	    var color = [];
-	    do {
-	        color = randomcolor(opts);
-	    } while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
-	    return color;
+		opts.format = format;
+		var color = [];
+		do {
+			color = randomcolor(opts);
+		} while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
+		return color;
 	};
 
 	// Fisher-Yates shuffle
 	Utils.shuffle = function (array) {
-	    var m = array.length,
-	        t = void 0,
-	        i = void 0;
+		var m = array.length,
+		    t = void 0,
+		    i = void 0;
 
-	    // While there remain elements to shuffle…
-	    while (m) {
+		// While there remain elements to shuffle…
+		while (m) {
 
-	        // Pick a remaining element…
-	        i = Math.floor(Math.random() * m--);
+			// Pick a remaining element…
+			i = Math.floor(Math.random() * m--);
 
-	        // And swap it with the current element.
-	        t = array[m];
-	        array[m] = array[i];
-	        array[i] = t;
-	    }
+			// And swap it with the current element.
+			t = array[m];
+			array[m] = array[i];
+			array[i] = t;
+		}
 
-	    return array;
+		return array;
 	};
 
 	// Returns shallow clone of array
 	Utils.cloneArrayShallow = function (array) {
-	    var clone = [];
-	    for (var i = 0, len = array.length; i < len; i++) {
-	        clone[i] = array[i];
-	    }
-	    return clone;
+		var clone = [];
+		for (var i = 0, len = array.length; i < len; i++) {
+			clone[i] = array[i];
+		}
+		return clone;
 	};
 
 	// Returns rgb representation of a hex color code
 	Utils.hexToRgb = function (hex) {
-	    var rgb = [];
-	    var fail = false;
-	    var original = hex;
+		var rgb = [];
+		var fail = false;
+		var original = hex;
 
-	    hex = hex.replace(/#/, '');
+		hex = hex.replace(/#/, '');
 
-	    if (hex.length === 3) {
-	        hex = hex + hex;
-	    }
+		if (hex.length === 3) {
+			hex = hex + hex;
+		}
 
-	    for (var i = 0; i < 6; i += 2) {
-	        rgb.push(parseInt(hex.substr(i, 2), 16));
-	        fail = fail || rgb[rgb.length - 1].toString() === 'NaN';
-	    }
+		for (var i = 0; i < 6; i += 2) {
+			rgb.push(parseInt(hex.substr(i, 2), 16));
+			fail = fail || rgb[rgb.length - 1].toString() === 'NaN';
+		}
 
-	    return !fail && rgb;
+		return !fail && rgb;
 	};
 
 	// Returns hsl representation of an rgb color code
 	Utils.rgbToHsl = function (r, g, b) {
 
-	    r /= 255;
-	    g /= 255;
-	    b /= 255;
+		r /= 255;
+		g /= 255;
+		b /= 255;
 
-	    var max = Math.max(r, g, b),
-	        min = Math.min(r, g, b);
-	    var h = void 0,
-	        s = void 0,
-	        l = (max + min) / 2;
+		var max = Math.max(r, g, b),
+		    min = Math.min(r, g, b);
+		var h = void 0,
+		    s = void 0,
+		    l = (max + min) / 2;
 
-	    if (max === min) {
-	        h = s = 0;
-	    } else {
-	        var d = max - min;
-	        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+		if (max === min) {
+			h = s = 0;
+		} else {
+			var d = max - min;
+			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
-	        switch (max) {
-	            case r:
-	                h = (g - b) / d + (g < b ? 6 : 0);
-	                break;
-	            case g:
-	                h = (b - r) / d + 2;
-	                break;
-	            case b:
-	                h = (r - g) / d + 4;
-	                break;
-	        }
+			switch (max) {
+				case r:
+					h = (g - b) / d + (g < b ? 6 : 0);
+					break;
+				case g:
+					h = (b - r) / d + 2;
+					break;
+				case b:
+					h = (r - g) / d + 4;
+					break;
+			}
 
-	        h /= 6;
-	    }
+			h /= 6;
+		}
 
-	    return [h * 100 + 0.5 | 0, (s * 100 + 0.5 | 0) + '%', (l * 100 + 0.5 | 0) + '%'];
+		return [h * 100 + 0.5 | 0, (s * 100 + 0.5 | 0) + '%', (l * 100 + 0.5 | 0) + '%'];
 	};
 
 	// Returns hsl representation of a hex color code
 	Utils.hexToHsl = function (hex) {
-	    return Utils.rgbToHsl.apply(Utils, _toConsumableArray(Utils.hexToRgb(hex)));
+		return Utils.rgbToHsl.apply(Utils, _toConsumableArray(Utils.hexToRgb(hex)));
 	};
 
 	// Returns array representation of an hsl color string
 	Utils.arrayToHsl = function (array) {
-	    return 'hsl(' + array[0] + ',' + array[1] + '%,' + array[2] + '%)';
+		return 'hsl(' + array[0] + ',' + array[1] + '%,' + array[2] + '%)';
 	};
 
-		module.exports = Utils;
+	// Compares two hsl arrays and returns true when colors are equal
+	Utils.equalHslArrays = function (array1, array2, loose) {
+		if (loose) {
+			return Math.abs(array1[0] - array2[0]) < 1 && Math.abs(array1[1] - array2[1] < 1) && Math.abs(array1[2] - array2[2] < 1);
+		}
+		return array1[0] === array2[0] && array1[1] === array2[1] && array1[2] === array2[2];
+	};
+
+	Utils.sign = function (n) {
+		return n === 0 ? 0 : n / Math.abs(n);
+	};
+
+	module.exports = Utils;
 
 /***/ },
 /* 3 */
