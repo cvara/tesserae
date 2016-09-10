@@ -31,7 +31,11 @@ class Tesserae {
 			step: 2
 		},
 		// periodically change color of random tiles
-		live = true
+		live = {
+			enable: true,
+			minInterval: 50,
+			maxInterval: 500
+		}
 	}) {
 
 		// container is the only required parameter
@@ -47,6 +51,7 @@ class Tesserae {
 			throw `Tesserae Error: no container element found: ${container}`;
 		}
 
+		// settings
 		this.tesseraWidth = parseInt(tesseraWidth, 10);
 		this.tesseraHeight = parseInt(tesseraHeight, 10);
 		this.randomcolor = randomcolor;
@@ -54,6 +59,14 @@ class Tesserae {
 		this.gradual = gradual;
 		this.animate = animate;
 		this.live = live;
+		if (this.live && this.live.enable !== false) {
+			let min = parseInt(live.minInterval, 10) || 50;
+			let max = parseInt(live.maxInterval, 10) || 500;
+			this.live.minInterval = min;
+			this.live.maxInterval = Math.max(min, max);
+		}
+
+		// cache computed style for convenience
 		this.containerStyle = window.getComputedStyle(this.containerEl, null);
 
 		// all drawn tessera shapes are stored here
@@ -93,7 +106,7 @@ class Tesserae {
 		this._addFilter();
 
 		// gradually show tesserae in random order
-		if (this.gradual && this.gradual.enable) {
+		if (this.gradual && this.gradual.enable !== false) {
 			const clone = Utils.cloneArrayShallow(this.tesserae);
 			Utils.shuffle(clone);
 			this._drawTesseraeGradually(clone, 0, this.gradual.step || 1, this.renderVersion);
@@ -104,7 +117,7 @@ class Tesserae {
 		}
 
 		// start animating random tesserae
-		if (this.live) {
+		if (this.live && this.live.enable !== false) {
 			this._animateRandomTessera(this.live);
 		}
 	}
@@ -114,7 +127,7 @@ class Tesserae {
 			let randomTessera = this._getRandomTessera();
 			randomTessera.animateToColor(this.ctx, Utils.getRandomColor(this.randomcolor, 'hslArray'));
 			this._animateRandomTessera();
-		}, Utils.getRandomInt(50, 2000));
+		}, Utils.getRandomInt(this.live.minInterval, this.live.maxInterval));
 	}
 
 	_editContainer () {

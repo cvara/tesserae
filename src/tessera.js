@@ -14,7 +14,7 @@ class Tessera {
 	}
 
 	draw (ctx, animate) {
-		if (animate && animate.enable) {
+		if (animate && animate.enable !== false) {
 			this.drawAnimated(ctx, animate.step);
 		} else {
 			ctx.fillStyle = this.hsl;
