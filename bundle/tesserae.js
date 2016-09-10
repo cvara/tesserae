@@ -82,7 +82,11 @@ var Tesserae =
 				step: 2
 			} : _ref$animate;
 			var _ref$live = _ref.live;
-			var live = _ref$live === undefined ? true : _ref$live;
+			var live = _ref$live === undefined ? {
+				enable: true,
+				minInterval: 50,
+				maxInterval: 500
+			} : _ref$live;
 
 			_classCallCheck(this, Tesserae);
 
@@ -99,6 +103,7 @@ var Tesserae =
 				throw 'Tesserae Error: no container element found: ' + container;
 			}
 
+			// settings
 			this.tesseraWidth = parseInt(tesseraWidth, 10);
 			this.tesseraHeight = parseInt(tesseraHeight, 10);
 			this.randomcolor = randomcolor;
@@ -106,6 +111,14 @@ var Tesserae =
 			this.gradual = gradual;
 			this.animate = animate;
 			this.live = live;
+			if (this.live && this.live.enable !== false) {
+				var min = parseInt(live.minInterval, 10) || 50;
+				var max = parseInt(live.maxInterval, 10) || 500;
+				this.live.minInterval = min;
+				this.live.maxInterval = Math.max(min, max);
+			}
+
+			// cache computed style for convenience
 			this.containerStyle = window.getComputedStyle(this.containerEl, null);
 
 			// all drawn tessera shapes are stored here
@@ -149,7 +162,7 @@ var Tesserae =
 				this._addFilter();
 
 				// gradually show tesserae in random order
-				if (this.gradual && this.gradual.enable) {
+				if (this.gradual && this.gradual.enable !== false) {
 					var clone = Utils.cloneArrayShallow(this.tesserae);
 					Utils.shuffle(clone);
 					this._drawTesseraeGradually(clone, 0, this.gradual.step || 1, this.renderVersion);
@@ -160,7 +173,7 @@ var Tesserae =
 					}
 
 				// start animating random tesserae
-				if (this.live) {
+				if (this.live && this.live.enable !== false) {
 					this._animateRandomTessera(this.live);
 				}
 			}
@@ -173,7 +186,7 @@ var Tesserae =
 					var randomTessera = _this._getRandomTessera();
 					randomTessera.animateToColor(_this.ctx, Utils.getRandomColor(_this.randomcolor, 'hslArray'));
 					_this._animateRandomTessera();
-				}, Utils.getRandomInt(50, 2000));
+				}, Utils.getRandomInt(this.live.minInterval, this.live.maxInterval));
 			}
 		}, {
 			key: '_editContainer',
@@ -365,7 +378,7 @@ var Tesserae =
 		_createClass(Tessera, [{
 			key: 'draw',
 			value: function draw(ctx, animate) {
-				if (animate && animate.enable) {
+				if (animate && animate.enable !== false) {
 					this.drawAnimated(ctx, animate.step);
 				} else {
 					ctx.fillStyle = this.hsl;
@@ -486,150 +499,150 @@ var Tesserae =
 	// Code borrowed from underscore:
 	// http://underscorejs.org/docs/underscore.html#section-83
 	Utils.debounce = function (func, wait, immediate) {
-		var timeout = void 0;
-		return function () {
-			var context = this,
-			    args = arguments;
-			var later = function later() {
-				timeout = null;
-				if (!immediate) {
-					func.apply(context, args);
-				}
-			};
-			var callNow = immediate && !timeout;
-			clearTimeout(timeout);
-			timeout = setTimeout(later, wait);
-			if (callNow) {
-				func.apply(context, args);
-			}
-		};
+					var timeout = void 0;
+					return function () {
+									var context = this,
+									    args = arguments;
+									var later = function later() {
+													timeout = null;
+													if (!immediate) {
+																	func.apply(context, args);
+													}
+									};
+									var callNow = immediate && !timeout;
+									clearTimeout(timeout);
+									timeout = setTimeout(later, wait);
+									if (callNow) {
+													func.apply(context, args);
+									}
+					};
 	};
 
 	// Returns random int between min (inclusive) and max (exclusive)
 	Utils.getRandomInt = function (min, max) {
-		min = Math.ceil(min);
-		max = Math.floor(max);
-		return Math.floor(Math.random() * (max - min)) + min;
+					min = Math.ceil(min);
+					max = Math.floor(max);
+					return Math.floor(Math.random() * (max - min)) + min;
 	};
 
 	// Returns random color using a random color generator
 	// see: https://github.com/davidmerfield/randomColor
 	Utils.getRandomColor = function (opts, format) {
-		opts.format = format;
-		var color = [];
-		do {
-			color = randomcolor(opts);
-		} while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
-		return color;
+					opts.format = format;
+					var color = [];
+					do {
+									color = randomcolor(opts);
+					} while (isNaN(color[0]) || isNaN(color[1]) || isNaN(color[2]));
+					return color;
 	};
 
 	// Fisher-Yates shuffle
 	Utils.shuffle = function (array) {
-		var m = array.length,
-		    t = void 0,
-		    i = void 0;
+					var m = array.length,
+					    t = void 0,
+					    i = void 0;
 
-		// While there remain elements to shuffle…
-		while (m) {
+					// While there remain elements to shuffle…
+					while (m) {
 
-			// Pick a remaining element…
-			i = Math.floor(Math.random() * m--);
+									// Pick a remaining element…
+									i = Math.floor(Math.random() * m--);
 
-			// And swap it with the current element.
-			t = array[m];
-			array[m] = array[i];
-			array[i] = t;
-		}
+									// And swap it with the current element.
+									t = array[m];
+									array[m] = array[i];
+									array[i] = t;
+					}
 
-		return array;
+					return array;
 	};
 
 	// Returns shallow clone of array
 	Utils.cloneArrayShallow = function (array) {
-		var clone = [];
-		for (var i = 0, len = array.length; i < len; i++) {
-			clone[i] = array[i];
-		}
-		return clone;
+					var clone = [];
+					for (var i = 0, len = array.length; i < len; i++) {
+									clone[i] = array[i];
+					}
+					return clone;
 	};
 
 	// Returns rgb representation of a hex color code
 	Utils.hexToRgb = function (hex) {
-		var rgb = [];
-		var fail = false;
-		var original = hex;
+					var rgb = [];
+					var fail = false;
+					var original = hex;
 
-		hex = hex.replace(/#/, '');
+					hex = hex.replace(/#/, '');
 
-		if (hex.length === 3) {
-			hex = hex + hex;
-		}
+					if (hex.length === 3) {
+									hex = hex + hex;
+					}
 
-		for (var i = 0; i < 6; i += 2) {
-			rgb.push(parseInt(hex.substr(i, 2), 16));
-			fail = fail || rgb[rgb.length - 1].toString() === 'NaN';
-		}
+					for (var i = 0; i < 6; i += 2) {
+									rgb.push(parseInt(hex.substr(i, 2), 16));
+									fail = fail || rgb[rgb.length - 1].toString() === 'NaN';
+					}
 
-		return !fail && rgb;
+					return !fail && rgb;
 	};
 
 	// Returns hsl representation of an rgb color code
 	Utils.rgbToHsl = function (r, g, b) {
 
-		r /= 255;
-		g /= 255;
-		b /= 255;
+					r /= 255;
+					g /= 255;
+					b /= 255;
 
-		var max = Math.max(r, g, b),
-		    min = Math.min(r, g, b);
-		var h = void 0,
-		    s = void 0,
-		    l = (max + min) / 2;
+					var max = Math.max(r, g, b),
+					    min = Math.min(r, g, b);
+					var h = void 0,
+					    s = void 0,
+					    l = (max + min) / 2;
 
-		if (max === min) {
-			h = s = 0;
-		} else {
-			var d = max - min;
-			s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+					if (max === min) {
+									h = s = 0;
+					} else {
+									var d = max - min;
+									s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
 
-			switch (max) {
-				case r:
-					h = (g - b) / d + (g < b ? 6 : 0);
-					break;
-				case g:
-					h = (b - r) / d + 2;
-					break;
-				case b:
-					h = (r - g) / d + 4;
-					break;
-			}
+									switch (max) {
+													case r:
+																	h = (g - b) / d + (g < b ? 6 : 0);
+																	break;
+													case g:
+																	h = (b - r) / d + 2;
+																	break;
+													case b:
+																	h = (r - g) / d + 4;
+																	break;
+									}
 
-			h /= 6;
-		}
+									h /= 6;
+					}
 
-		return [h * 100 + 0.5 | 0, (s * 100 + 0.5 | 0) + '%', (l * 100 + 0.5 | 0) + '%'];
+					return [h * 100 + 0.5 | 0, (s * 100 + 0.5 | 0) + '%', (l * 100 + 0.5 | 0) + '%'];
 	};
 
 	// Returns hsl representation of a hex color code
 	Utils.hexToHsl = function (hex) {
-		return Utils.rgbToHsl.apply(Utils, _toConsumableArray(Utils.hexToRgb(hex)));
+					return Utils.rgbToHsl.apply(Utils, _toConsumableArray(Utils.hexToRgb(hex)));
 	};
 
 	// Returns array representation of an hsl color string
 	Utils.arrayToHsl = function (array) {
-		return 'hsl(' + array[0] + ',' + array[1] + '%,' + array[2] + '%)';
+					return 'hsl(' + array[0] + ',' + array[1] + '%,' + array[2] + '%)';
 	};
 
 	// Compares two hsl arrays and returns true when colors are equal
 	Utils.equalHslArrays = function (array1, array2, loose) {
-		if (loose) {
-			return Math.abs(array1[0] - array2[0]) < 1 && Math.abs(array1[1] - array2[1] < 1) && Math.abs(array1[2] - array2[2] < 1);
-		}
-		return array1[0] === array2[0] && array1[1] === array2[1] && array1[2] === array2[2];
+					if (loose) {
+									return Math.abs(array1[0] - array2[0]) < 1 && Math.abs(array1[1] - array2[1] < 1) && Math.abs(array1[2] - array2[2] < 1);
+					}
+					return array1[0] === array2[0] && array1[1] === array2[1] && array1[2] === array2[2];
 	};
 
 	Utils.sign = function (n) {
-		return n === 0 ? 0 : n / Math.abs(n);
+					return n === 0 ? 0 : n / Math.abs(n);
 	};
 
 	module.exports = Utils;

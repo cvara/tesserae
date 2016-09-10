@@ -1,7 +1,7 @@
 {
   "name": "tesserae",
-  "version": "0.10.0",
-  "description": "Animated mosaic backgrounds for the web",
+  "version": "0.10.1",
+  "description": "Animated mosaic backgrounds with HTML5 Canvas",
   "keywords": [
     "mosaic",
     "background",
