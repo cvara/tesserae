@@ -97,7 +97,7 @@
 									<div class="form-group">
 										<label for="hue">Hue</label>
 										<select class="form-control input-sm" id="hue" name="randomcolor[hue]">
-											<option value="">random</option>
+											<option value="" selected="selected">random</option>
 											<option>red</option>
 											<option>orange</option>
 											<option>yellow</option>
@@ -105,7 +105,7 @@
 											<option>blue</option>
 											<option>purple</option>
 											<option>pink</option>
-											<option selected="selected">monochrome</option>
+											<option>monochrome</option>
 										</select>
 									</div>
 								</div>
@@ -137,7 +137,7 @@
 								<label for="width">Filter</label>
 								<div class="row">
 									<div class="col-xs-6 col-sm-3 col-md-3">
-										<input type="color" class="form-control input-sm" id="width" name="filter[color]" placeholder="filter color" value="#16a085">
+										<input type="color" class="form-control input-sm" id="width" name="filter[color]" placeholder="filter color" value="#d35400">
 									</div>
 									<div class="col-xs-6 col-sm-3 col-md-3">
 										<input type="number" min="0" max="1" step="0.05" class="form-control input-sm col-sm-6" id="height" name="filter[opacity]" placeholder="filter opacity" value="0.9">
@@ -168,11 +168,26 @@
 							<div class="form-group">
 								<label style="display:block">Live mode &nbsp;&nbsp;</label>
 								<label class="radio-inline">
-									<input type="radio" name="live" value="true" checked> Enabled
+									<input type="radio" name="live[enable]" value="true" checked> Enabled
 								</label>
 								<label class="radio-inline">
-									<input type="radio" name="live" value="false"> Disabled
+									<input type="radio" name="live[enable]" value="false"> Disabled
 								</label>
+							</div>
+
+							<div class="row">
+								<div class="col-xs-6 col-sm-3">
+									<div class="form-group ">
+										<label for="width">Live min interval</label>
+											<input type="number" class="form-control input-sm" name="live[minInterval]" placeholder="min" value="10">
+									</div>
+								</div>
+								<div class="col-xs-6 col-sm-3">
+									<div class="form-group ">
+										<label for="width">Live max interval</label>
+											<input type="number" class="form-control input-sm" name="live[maxInterval]" placeholder="max" value="100">
+									</div>
+								</div>
 							</div>
 
 							<div class="row">
@@ -225,7 +240,8 @@
 				var newOpts = $('form').serializeObject();
 				newOpts.gradual.enable = newOpts.gradual.enable === 'true' ? true : false;
 				newOpts.animate.enable = newOpts.animate.enable === 'true' ? true : false;
-				newOpts.live = newOpts.live === 'true' ? true : false;
+				newOpts.live.enable = newOpts.live.enable === 'true' ? true : false;
+				console.log(newOpts);
 				return $.extend({}, options, newOpts);
 			}
 
@@ -233,7 +249,6 @@
 
 			$('form :input').change(function() {
 				options = getUpdatedOptions();
-				console.log(options);
 				tesserae.destroy();
 				tesserae = new Tesserae(options);
 			});
