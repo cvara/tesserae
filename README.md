@@ -10,7 +10,7 @@ The reasoning behind this lies in the performance gains of Immediate Mode (canva
 
 Despite being faster and less memory taxing on modern desktop browsers, using canvas comes with its downsides:
 
-* not all browsers support canvas
+* not all browsers support it
 * canvas performance on some mobile browsers is poor
 
 Both the above issues can be countered by gracefully degrading to a static/image background on mobile browsers or on browsers that do not support canvas.
@@ -223,7 +223,7 @@ var t = new Tesserae({
 // example: live backround
 var t = new Tesserae({
   container: '#some-container',
-  live = true
+  live: true
 });
 ```
 
