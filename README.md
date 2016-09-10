@@ -211,19 +211,30 @@ var t = new Tesserae({
     step: 4
   }
 });
-
-
 ```
+
 ### live
 
-`boolean`: Enables "live mode" which forces random tiles to periodically change color. It creates a subtle effect which is barely visible in same-hue backgrounds with filter. `default`: `true`
+`object` or `false`: Enables "live mode" which forces random tiles to periodically change color. It creates a subtle effect which is barely visible in same-hue backgrounds with filter.
 
+The change interval is random within the range of `live.minInterval` and `live.maxInterval`. `default`:
+```js
+live = {
+  enable: true,
+  minInterval: 50,
+  maxInterval: 500
+}
+```
 
 ```js
-// example: live backround
+// example: live backround with random hue and shorter change intervals
 var t = new Tesserae({
   container: '#some-container',
-  live: true
+  live: {
+    // shorter intervals make effect more prominent
+    minInterval: 10,
+    maxInterval: 100
+  }
 });
 ```
 
