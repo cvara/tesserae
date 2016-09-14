@@ -118,15 +118,20 @@ class Tesserae {
 
 		// start animating random tesserae
 		if (this.live && this.live.enable !== false) {
-			this._animateRandomTessera(this.live);
+			// calculate batch size based on total number of tiles
+			let batch = Math.max(1, Math.floor(this.tesserae.length / 200));
+			this._animateRandomTessera(batch);
 		}
 	}
 
-	_animateRandomTessera () {
+	_animateRandomTessera (batch) {
+		let n = batch;
 		this.animateTimer = setTimeout(() => {
-			let randomTessera = this._getRandomTessera();
-			randomTessera.animateToColor(this.ctx, Utils.getRandomColor(this.randomcolor, 'hslArray'));
-			this._animateRandomTessera();
+			while (n-- > 0) {
+				const randomTessera = this._getRandomTessera();
+				randomTessera.animateToColor(this.ctx, Utils.getRandomColor(this.randomcolor, 'hslArray'));
+			}
+			this._animateRandomTessera(batch);
 		}, Utils.getRandomInt(this.live.minInterval, this.live.maxInterval));
 	}
 
