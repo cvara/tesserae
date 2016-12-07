@@ -82,11 +82,23 @@ class Tesserae {
 	}
 
 	_init () {
+		// know when windows loses focus
+		this._initBlurMonitor();
 		// lazy draw function (debounced)
 		this.lazyDraw = Utils.debounce(this.draw, 200).bind(this);
 		window.addEventListener('resize', this.lazyDraw);
 		// draw for the first time
 		this.draw();
+	}
+
+	_initBlurMonitor () {
+		this.hasFocus = true;
+		window.onblur = () => {
+			this.hasFocus = false;
+		};
+		window.onfocus = () => {
+			this.hasFocus = true;
+		};
 	}
 
 	destroy () {
@@ -126,13 +138,17 @@ class Tesserae {
 
 	_animateRandomTessera (batch) {
 		let n = batch;
+		const { getRandomColor, getRandomInt } = Utils;
 		this.animateTimer = setTimeout(() => {
-			while (n-- > 0) {
-				const randomTessera = this._getRandomTessera();
-				randomTessera.animateToColor(this.ctx, Utils.getRandomColor(this.randomcolor, 'hslArray'));
+			// don't stack animations when window is not focused
+			if (this.hasFocus) {
+				while (n-- > 0) {
+					const randomTessera = this._getRandomTessera();
+					randomTessera.animateToColor(this.ctx, getRandomColor(this.randomcolor, 'hslArray'));
+				}
 			}
 			this._animateRandomTessera(batch);
-		}, Utils.getRandomInt(this.live.minInterval, this.live.maxInterval));
+		}, getRandomInt(this.live.minInterval, this.live.maxInterval));
 	}
 
 	_editContainer () {
