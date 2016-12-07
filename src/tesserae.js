@@ -51,6 +51,14 @@ class Tesserae {
 			throw `Tesserae Error: no container element found: ${container}`;
 		}
 
+		// cache computed style for convenience
+		this.containerStyle = window.getComputedStyle(this.containerEl, null);
+
+		// make sure container element is of non-zero width/height
+		if (!parseInt(this.containerStyle.width, 10) || !parseInt(this.containerStyle.height, 10)) {
+			throw `Tesserae Error: container has zero width and/or height: ${container}`;
+		}
+
 		// settings
 		this.tesseraWidth = parseInt(tesseraWidth, 10);
 		this.tesseraHeight = parseInt(tesseraHeight, 10);
@@ -66,8 +74,6 @@ class Tesserae {
 			this.live.maxInterval = Math.max(min, max);
 		}
 
-		// cache computed style for convenience
-		this.containerStyle = window.getComputedStyle(this.containerEl, null);
 
 		// all drawn tessera shapes are stored here
 		this.tesserae = [];
