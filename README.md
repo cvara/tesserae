@@ -1,7 +1,7 @@
 Tesserae
 =======================
 
-### Animated mosaic backgrounds with HTML5 Canvas ([demo](https://thet0dd.github.io/tesserae/))
+### Animated mosaic backgrounds with HTML5 Canvas ([demo](https://cvara.github.io/tesserae/))
 
 Tesserae is a small library that creates customizable and optionally animated mosaic patterns that can be used to replace dull/static/image backgrounds.
 
@@ -93,7 +93,7 @@ var t = new Tesserae({
 });
 ```
 
-**NOTE:** Tesserae respects the `container` size. In fact, it expects `container` to be **visible** and of **non-zero width/height**. So for example, trying to initialize Tesserae on an empty `<div>` whose dimensions are not explicitly set would yield no result.  
+**NOTE:** Tesserae respects the `container` size. In fact, it expects `container` to be **visible** and of **non-zero width/height**. So for example, trying to initialize Tesserae on an empty `<div>` whose dimensions are not explicitly set would yield no result.
 
 ### tesseraWidth
 
@@ -276,7 +276,7 @@ t.draw();
 
 ## License
 
-[MIT](https://github.com/TheT0dd/tesserae/blob/master/LICENSE)
+[MIT](https://github.com/cvara/tesserae/blob/master/LICENSE)
 
 
 ## Author

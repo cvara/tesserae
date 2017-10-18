@@ -10,7 +10,7 @@
   "main": "dist/tesserae.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/TheT0dd/tesserae.git"
+    "url": "https://github.com/cvara/tesserae.git"
   },
   "scripts": {
     "build": "babel src --presets babel-preset-es2015 --out-dir dist",
